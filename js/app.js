@@ -130,23 +130,25 @@
   /* 2.2 à 2.5 Tutoriel */
   E.tuto = () => {
     const n = ui.etape || 0; const c = comp();
+    const rond = (fond, contenu) => `<div style="width:80px;height:80px;border-radius:50%;background:${fond};display:grid;place-items:center;margin:0 auto 10px">${contenu}</div>`;
     const etapes = [
-      { titre: `Salut, moi c’est ${c.nom} !`, txt: 'Je porte un capteur, comme toi. Ensemble, on va apprendre à comprendre ton corps.', haut: `<img src="assets/compagnon/${c.id}.svg" alt="" style="width:230px;margin:0 auto">` },
-      { titre: 'Voici ma flèche', txt: 'Elle montre où va ton sucre. Touche ton chiffre sous ma bulle pour voir ta journée !',
-        haut: `<div class="carte" style="display:flex;justify-content:space-around;padding:24px 8px">${[['haut-droite', 'Ça monte'], ['droite', 'Stable'], ['bas-droite', 'Ça descend']].map(([d, l]) => `<div class="centre"><div style="width:72px;height:72px;border-radius:50%;background:#25728C;display:grid;place-items:center;margin:0 auto 8px">${fleche(d)}</div><span style="font-size:14px;font-weight:500">${l}</span></div>`).join('')}</div>` },
-      { titre: 'Ce que je ressens, ton corps le ressent', txt: 'Quand j’ai faim ou soif, c’est ton corps qui te parle. Si c’est urgent, je te dirai d’aller voir un adulte.',
-        haut: `<div class="carte" style="display:flex;justify-content:space-around;padding:16px 4px">${[['bas', 'J’ai faim', 'Bas'], ['zone', 'En forme', 'Dans la zone'], ['haut', 'J’ai soif', 'Haut']].map(([b, l, s]) => `<div class="centre"><img src="assets/bulle/${b}.svg" alt="" style="width:92px;margin:0 auto"><b style="font-size:14px;font-weight:500">${l}</b><div class="petit">${s}</div></div>`).join('')}</div>` },
-      { titre: 'Joue avec moi !', txt: 'Prends tes repas en photo et relève des défis pour gagner des étoiles. Avec elles, tu m’habilles et tu décores mon monde.',
-        haut: `<div class="carte" style="display:flex;justify-content:space-around;padding:24px 8px"><div class="centre"><div style="width:84px;height:84px;border-radius:50%;background:#32A3C9;color:#fff;display:grid;place-items:center;margin:0 auto 8px"><span style="width:40px;height:40px">${I.camera}</span></div><b style="font-size:14px;font-weight:500">Attrape tes aliments</b></div><div class="centre"><div style="width:84px;height:84px;border-radius:50%;background:#FE9732;display:grid;place-items:center;margin:0 auto 8px"><svg viewBox="0 0 50 48" width="44"><path fill="#fff" d="M25 3l6 14 15 1-12 10 4 16-13-9-13 9 4-16L4 18l15-1z"/></svg></div><b style="font-size:14px;font-weight:500">Relève des défis</b></div></div>` }
+      { titre: `Salut, moi c’est ${c.nom} !`, txt: 'Je porte un capteur, comme toi. Ensemble, on va apprendre à comprendre ton corps.',
+        haut: `<img src="assets/compagnon/${c.id}.svg" alt="" style="width:250px;margin:0 auto">`, image: true },
+      { titre: 'Elle montre où va ton sucre', txt: 'Vers le haut, tout droit ou vers le bas. Touche ton chiffre sous ma bulle pour voir ta journée !',
+        haut: `<h2 class="h2">Voici ma flèche</h2><div style="display:flex;justify-content:space-around;margin:20px 0 14px">${[['haut-droite', 'Ça monte'], ['droite', 'Stable'], ['bas-droite', 'Ça descend']].map(([d, l]) => `<div>${rond('#25728C', fleche(d))}<b style="font-size:14px;font-weight:500">${l}</b></div>`).join('')}</div><p class="petit">Plus la flèche penche, plus ça bouge vite.</p>` },
+      { titre: 'Ce que je ressens, ton corps le ressent', txt: 'Quand j’ai faim ou soif, c’est ton corps qui te parle.',
+        haut: `<h2 class="h2">Mes besoins</h2><div style="display:flex;justify-content:space-around;margin:16px 0 10px">${[['bas', 'J’ai faim', 'Bas'], ['zone', 'En forme', 'Dans la zone'], ['haut', 'J’ai soif', 'Haut']].map(([b, l, s2]) => `<div><img src="assets/bulle/${b}.svg" alt="" style="width:84px;margin:0 auto"><b style="font-size:14px;font-weight:500">${l}</b><div class="petit">${s2}</div></div>`).join('')}</div><p class="petit">Si c’est urgent, je te dirai d’aller voir un adulte.</p>` },
+      { titre: 'Joue avec moi !', txt: 'Prends tes repas en photo pour découvrir ce qui fait bouger ta flèche.',
+        haut: `<div style="display:flex;justify-content:space-around;margin:8px 0 16px"><div>${rond('#32A3C9', `<span style="width:40px;height:40px;color:#fff">${I.camera}</span>`)}<b style="font-size:14px;font-weight:500">Attrape tes aliments</b></div><div>${rond('#FE9732', '<svg viewBox="0 0 50 48" width="40"><path fill="#fff" d="M25 3l6 14 15 1-12 10 4 16-13-9-13 9 4-16L4 18l15-1z"/></svg>')}<b style="font-size:14px;font-weight:500">Relève des défis</b></div></div><p class="petit">Gagne des étoiles pour habiller ${esc(c.nom)} et décorer son monde.</p>` }
     ];
     const e = etapes[n];
     return `<section class="screen" aria-labelledby="t-tuto">
       <img class="decor" src="${decorSrc('prairie')}" alt="">
       ${statut()}
-      <div style="position:relative;display:flex;justify-content:flex-end;padding:8px 24px"><button class="btn lien petit" data-act="finTuto">Passer</button></div>
-      <div style="position:relative;flex:1;display:flex;align-items:center;padding:0 24px">${e.haut}</div>
-      <div style="position:relative;padding:0 24px 150px">
-        <div class="carte centre" style="padding:20px"><h2 id="t-tuto" class="h2">${e.titre}</h2><p class="txt" style="margin-top:10px">${e.txt}</p></div>
+      <div style="position:relative;display:flex;justify-content:flex-end;padding:4px 24px 0"><button class="btn lien petit" data-act="finTuto">Passer</button></div>
+      <div style="position:relative;padding:12px 24px 0;text-align:center">${e.image ? e.haut : `<div class="carte" style="padding:24px 16px;border-radius:28px">${e.haut}</div>`}</div>
+      <div style="position:absolute;left:24px;right:24px;bottom:128px">
+        <div class="carte centre" style="padding:20px;border-radius:28px"><h2 id="t-tuto" class="h2">${e.titre}</h2><p class="txt" style="margin-top:10px">${e.txt}</p></div>
         <div class="points" aria-label="Étape ${n + 1} sur 4">${[0, 1, 2, 3].map(k => `<i class="${k === n ? 'on' : ''}"></i>`).join('')}</div>
       </div>
       <div class="actions-bas"><button class="btn ${n === 3 ? 'recompense' : 'principal'}" data-act="tutoSuivant">${n === 3 ? 'C’est parti !' : 'Suivant'}</button></div>

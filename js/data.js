@@ -13,6 +13,8 @@ window.DK = {
     haut:     { val: '11,8', tendance: 'monte',    fleche: 'haut-droite',couleur: '#E0A100', bulle: 'haut',          pose: 'foxy-soif', message: 'J’ai soif… on boit un verre d’eau ?' },
     tresHaut: { val: '15,2', tendance: 'très haut',fleche: 'haut',      couleur: '#E0A100', bulle: 'tres-haut',     pose: 'foxy-soif', message: 'Je suis très fatigué. Montre ça à un adulte.' },
     urgence:  { val: '2,9',  tendance: 'descend vite', fleche: 'bas',   couleur: '#8E1B1B', bulle: 'urgence-basse', pose: null,        message: '' },
+    pompe:    { val: '—',    tendance: 'pompe déconnectée', fleche: null, couleur: '#5E6A72', bulle: null, special: 'pompe', pose: null, message: 'Ma pompe ne répond plus. Demande à un adulte.' },
+    aide:     { val: '3,4',  tendance: 'descend',  fleche: 'bas-droite', couleur: '#D12F2F', bulle: null, special: 'aide', pose: null, message: 'Je ne me sens pas bien. On appelle maman ?' },
     attente:  { val: '—',    tendance: 'capteur en préparation', fleche: null, couleur: '#32A3C9', bulle: null, pose: 'foxy-dodo', message: 'Pas de lecture pour l’instant. Si ça dure, vérifie ton capteur avec un adulte.' }
   },
 
@@ -62,11 +64,11 @@ window.DK = {
   ],
 
   defis: [
-    { id: 'bolus', type: 'BOLUS', titre: 'Bolus avant le dîner', sous: 'Série : 2 jours sur 3', total: 3, fait: 2, recompense: 2, action: 'J’ai fait mon bolus', badge: 'serie-de-3',
+    { id: 'bolus', type: 'BOLUS', titre: 'Bolus avant le dîner', sous: 'Série : 2 jours sur 3', total: 3, fait: 2, recompense: 2, action: 'J’ai fait mon bolus', badge: 'serie-de-3', note: 'Tu as pensé à ton bolus avant le dîner.',
       pourquoi: 'L’insuline a besoin d’un peu de temps pour agir. La prendre avant le repas aide ta flèche à rester calme.' },
-    { id: 'sac', type: 'ROUTINE', titre: 'Collation dans mon sac', sous: 'Avant de partir à l’école', total: 5, fait: 3, recompense: 1, action: 'J’ai ma collation',
+    { id: 'sac', type: 'ROUTINE', titre: 'Collation dans mon sac', sous: 'Avant de partir à l’école', total: 5, fait: 3, recompense: 1, action: 'J’ai ma collation', note: 'Ta collation est prête dans ton sac.',
       pourquoi: 'Si ton énergie baisse, ta collation est déjà là. Tu n’as pas besoin de chercher.' },
-    { id: 'jardin', type: 'NOURRITURE', titre: 'Attrape 3 aliments Jardin', sous: 'Avec la caméra', total: 3, fait: 1, recompense: 3, action: 'Ouvrir la caméra',
+    { id: 'jardin', type: 'NOURRITURE', titre: 'Attrape 3 aliments Jardin', sous: 'Avec la caméra', total: 3, fait: 1, recompense: 3, action: 'Ouvrir la caméra', note: 'Encore un aliment Jardin attrapé.',
       pourquoi: 'Les légumes gardent ta flèche tranquille. Attrape-les pour remplir ton album !' }
   ],
 

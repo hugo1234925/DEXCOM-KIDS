@@ -146,10 +146,12 @@
       <img class="decor" src="${decorSrc('prairie')}" alt="">
       ${statut()}
       <div style="position:relative;display:flex;justify-content:flex-end;padding:4px 24px 0"><button class="btn lien petit" data-act="finTuto">Passer</button></div>
-      <div style="position:relative;padding:12px 24px 0;text-align:center">${e.image ? e.haut : `<div class="carte" style="padding:24px 16px;border-radius:28px;border-color:#32A3C9">${e.haut}</div>`}</div>
-      <div style="position:absolute;left:24px;right:24px;bottom:206px">
-        <div class="carte centre" style="padding:20px;border-radius:28px"><h2 id="t-tuto" class="h2">${e.titre}</h2><p class="txt" style="margin-top:10px">${e.txt}</p></div>
-        <div class="points" aria-label="Étape ${n + 1} sur 4">${[0, 1, 2, 3].map(k => `<i class="${k === n ? 'on' : ''}"></i>`).join('')}</div>
+      <div style="position:absolute;left:24px;right:24px;top:84px;bottom:210px;display:flex;flex-direction:column;justify-content:center;gap:20px;text-align:center">
+        <div>${e.image ? e.haut : `<div class="carte" style="padding:24px 16px;border-radius:28px;border-color:#32A3C9">${e.haut}</div>`}</div>
+        <div>
+          <div class="carte centre" style="padding:20px;border-radius:28px"><h2 id="t-tuto" class="h2">${e.titre}</h2><p class="txt" style="margin-top:10px">${e.txt}</p></div>
+          <div class="points" aria-label="Étape ${n + 1} sur 4">${[0, 1, 2, 3].map(k => `<i class="${k === n ? 'on' : ''}"></i>`).join('')}</div>
+        </div>
       </div>
       <div class="actions-bas" style="bottom:138px"><button class="btn ${n === 3 ? 'recompense' : 'principal'}" data-act="tutoSuivant">${n === 3 ? 'C’est parti !' : 'Suivant'}</button></div>
     </section>`;

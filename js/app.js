@@ -416,7 +416,7 @@
 
   /* 5.7 Choisir sans caméra */
   E.sansCamera = () => {
-    const cats = [['Fruits', 'pomme'], ['Légumes', 'carotte'], ['Pain et pâtes', 'pates'], ['Boissons', 'lait'], ['Collations', 'barre-granola'], ['Repas', 'oeuf']];
+    const cats = [['Fruits', 'pomme'], ['Légumes', 'carotte'], ['Pain et pâtes', 'pates'], ['Boissons sucrées', 'boisson-sucree'], ['Eau', 'eau'], ['Lait', 'lait'], ['Collations', 'barre-granola'], ['Repas', 'oeuf']];
     return `<section class="screen ciel" aria-labelledby="t-sc">${statut()}${entete('Pas de caméra ?')}
       <div class="scroll">
         <p class="txt" style="margin:0 4px 12px">Pas de problème ! Choisis ton aliment dans la liste.</p>

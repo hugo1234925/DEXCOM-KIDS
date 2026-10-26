@@ -55,12 +55,13 @@ window.DK = {
     { id: 'pomme', nom: 'Pomme', energie: 'Énergie longue', cat: 'Fruits', fait: 'Fait monter ta flèche doucement, grâce aux fibres.' },
     { id: 'carotte', nom: 'Carotte', energie: 'Jardin', cat: 'Légumes', fait: 'Presque pas de sucre : ta flèche reste tranquille.' },
     { id: 'pates', nom: 'Pâtes', energie: 'Énergie longue', cat: 'Pain et pâtes', fait: 'Fait monter ta flèche doucement pendant 2 ou 3 heures.' },
-    { id: 'jus', nom: 'Jus', energie: 'Éclair', cat: 'Boissons', fait: 'Fait monter ta flèche très vite. Parfait quand tu es bas !' },
+    { id: 'jus', nom: 'Jus', energie: 'Éclair', cat: 'Boissons sucrées', fait: 'Fait monter ta flèche très vite. Parfait quand tu es bas !' },
     { id: 'oeuf', nom: 'Œuf', energie: 'Bâtisseur', cat: 'Repas', fait: 'Des protéines : ta flèche bouge très peu.' },
     { id: 'brocoli', nom: 'Brocoli', energie: 'Jardin', cat: 'Légumes', fait: 'Plein de fibres, ta flèche reste calme.' },
     { id: 'barre-granola', nom: 'Barre granola', energie: 'Énergie rapide', cat: 'Collations', fait: 'Fait monter ta flèche assez vite, puis ça se calme.' },
-    { id: 'lait', nom: 'Lait', energie: 'Énergie longue', cat: 'Boissons', fait: 'Monte doucement, et ça aide tes os.' },
-    { id: 'eau', nom: 'Eau', energie: 'Jardin', cat: 'Boissons', fait: 'Zéro sucre. Parfait quand tu as soif !' }
+    { id: 'lait', nom: 'Lait', energie: 'Énergie longue', cat: 'Lait', fait: 'Monte doucement, et ça aide tes os.' },
+    { id: 'boisson-sucree', nom: 'Boisson sucrée', energie: 'Éclair', cat: 'Boissons sucrées', fait: 'Plein de sucre : ta flèche monte très vite. À garder pour quand tu es bas !' },
+    { id: 'eau', nom: 'Eau', energie: 'Jardin', cat: 'Eau', fait: 'Zéro sucre. Parfait quand tu as soif !' }
   ],
 
   defis: [

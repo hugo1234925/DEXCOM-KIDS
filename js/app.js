@@ -297,7 +297,7 @@
         <div style="width:200px;height:200px;margin:12px auto;border-radius:50%;background:#fff;border:14px solid #CDEAF4;display:grid;place-items:center"><b id="min" style="font-size:46px;color:#25728C">${String(ui.reste).padStart(2, '0')}:00</b></div>
         <p class="petit">(démo : le minuteur va très vite)</p>
         <img src="assets/compagnon/${S.compagnon}.svg" alt="" style="width:170px;margin:8px auto">
-        <div class="carte"><p class="txt">« Reste assis avec un adulte. Je te préviens quand c’est l’heure. »</p></div>
+        <div class="carte"><p class="txt">« Reste assis avec un adulte. Je te préviens quand c’est l’heure. »</p></div>
       </div>
       <div class="actions-bas"><button class="btn lien" data-act="appelerMaman">Appeler maman</button></div></section>`;
   };
@@ -310,7 +310,7 @@
         <h1 id="t-rm" class="h1">Ça remonte !</h1>
         <div style="width:170px;height:170px;margin:16px auto;border-radius:50%;background:#fff;border:9px solid #fff;box-shadow:0 0 0 5px #447C08;display:grid;place-items:center"><div><b style="font-size:46px">4,6</b><div class="petit">mmol/L</div></div></div>
         <img src="assets/compagnon/${S.compagnon}.svg" alt="" style="width:180px;margin:0 auto">
-        <div class="carte" style="margin-top:12px"><p class="txt">« Merci ! J’ai retrouvé de l’énergie. »</p></div>
+        <div class="carte" style="margin-top:12px"><p class="txt">« Merci ! J’ai retrouvé de l’énergie. »</p></div>
         <p class="petit" style="margin-top:12px">Maman a été prévenue que ça remonte.</p>
       </div>
       <div class="actions-bas"><button class="btn principal" data-act="accueil">Retour à l’accueil</button></div></section>`;
@@ -625,13 +625,13 @@
   E.lecture = () => {
     const v = S.lecture;
     const opt = (id, age, titre, ex) => `<p class="etiquette" style="margin-top:${id === 'simple' ? 22 : 28}px">${age}</p>
-        <button class="option haut ${v === id ? 'on' : ''}" role="radio" aria-checked="${v === id}" data-act="lecture" data-arg="${id}"><span class="grow"><b>${titre}</b><span class="exemple">${ex}</span></span>${radio(v === id)}</button>`;
+        <button class="option haut ${v === id ? 'on' : ''}" role="radio" aria-checked="${v === id}" data-act="lecture" data-arg="${id}" style="flex-wrap:wrap"><b style="flex:1">${titre}</b>${radio(v === id)}<span class="exemple" style="flex-basis:100%;margin-top:6px">${ex}</span></button>`;
     return `<section class="screen ciel" aria-labelledby="t-lc">${statut()}${entete('Niveau de lecture', { t: 30 })}
       <div class="scroll" style="padding-top:8px">
         <p class="txt" style="color:var(--texte-2)">Choisis selon l’âge de l’enfant et sa facilité à lire. Tu pourras changer plus tard.</p>
         <div role="radiogroup" aria-label="Niveau de lecture">
-        ${opt('simple', '7 à 9 ans', 'Icônes et mots simples', '« J’ai faim ! Mange une collation. »')}
-        ${opt('chiffres', '10 à 12 ans', 'Icônes, mots et chiffres', '« Bas · 3,6 mmol/L, en baisse. Prends 15 g de sucre. »')}</div>
+        ${opt('simple', '7 à 9 ans', 'Icônes et mots simples', '« J’ai faim ! Mange une collation. »')}
+        ${opt('chiffres', '10 à 12 ans', 'Icônes, mots et chiffres', '« Bas · 3,6 mmol/L, en baisse. Prends 15 g de sucre. »')}</div>
       </div>
       <div class="actions-bas" style="bottom:56px"><button class="btn principal" data-act="suite" data-arg="alertesInit">Suite</button></div></section>`;
   };
@@ -812,7 +812,7 @@
         <div style="position:relative;width:200px;height:200px;margin:16px auto 0"><svg viewBox="0 0 200 200" width="200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="#fff"/><circle cx="100" cy="100" r="80" fill="none" stroke="#CDEBF5" stroke-width="10"/><circle id="arcR" cx="100" cy="100" r="80" fill="none" stroke="#32A3C9" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 503" transform="rotate(-90 100 100)"/></svg>
           <div style="position:absolute;inset:0;display:grid;place-content:center"><b id="minR" style="font-size:24px;font-weight:600;color:#25728C">${ui.min} min</b><span class="petit">environ</span></div></div>
         <div style="position:relative;width:160px;margin:18px auto 0"><img src="assets/${dodo ? 'pose/' + poseDe('foxy-dodo') : 'compagnon/' + S.compagnon}.svg" alt="" style="width:160px"><span style="position:absolute;right:-90px;top:10px;font-size:24px;font-weight:600;color:#25728C">Z z z</span></div>
-        <div class="carte" style="border-radius:20px;margin-top:20px"><p class="txt">« Je fais une petite sieste. Je te réveille quand c’est prêt ! »</p></div>
+        <div class="carte" style="border-radius:20px;margin-top:20px"><p class="txt">« Je fais une petite sieste. Je te réveille quand c’est prêt ! »</p></div>
       </div>
       <div class="actions-bas" style="bottom:70px"><button class="btn secondaire" data-tab="perso">Décorer ma chambre en attendant</button></div></section>`;
   };
@@ -921,7 +921,7 @@
           <div style="display:flex;justify-content:space-between" class="petit"><span>${f(min)}</span><span>${f(max)}</span></div></div>
         <p class="etiquette">Répéter si personne ne réagit</p>${chips('repeter', ['15 min', '30 min', 'Jamais'])}
         <p class="etiquette">Son pour ${P()}</p>${chips('son', ['Doux', 'Normal', 'Fort'])}
-        <div class="info" style="display:flex;gap:12px;align-items:center;margin-top:24px"><img src="assets/bulle/${bas ? 'bas' : 'haut'}.svg" alt="" width="64"><div><div style="font-size:14px;font-weight:500;margin-bottom:4px">CE QUE ${P().toUpperCase()} VERRA</div><span class="txt" style="color:#14232B">${bas ? '« J’ai un petit creux… on prend une collation ? »' : '« J’ai soif… on boit un verre d’eau ? »'}</span></div></div>
+        <div class="info" style="display:flex;gap:12px;align-items:center;margin-top:24px"><img src="assets/bulle/${bas ? 'bas' : 'haut'}.svg" alt="" width="64"><div><div style="font-size:14px;font-weight:500;margin-bottom:4px">CE QUE ${P().toUpperCase()} VERRA</div><span class="txt" style="color:#14232B">${bas ? '« J’ai un petit creux… on prend une collation ? »' : '« J’ai soif… on boit un verre d’eau ? »'}</span></div></div>
         <button class="btn principal" style="margin-top:24px" data-act="enregistrer">Enregistrer</button>
       </div></section>`;
   };

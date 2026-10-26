@@ -1031,7 +1031,7 @@
     finTuto: () => { ui = {}; aller('permission', null, true); },
     autoriserCam: async () => { try { const f = await navigator.mediaDevices.getUserMedia({ video: true }); f.getTracks().forEach(t => t.stop()); } catch (e) { /* refusé : on continue */ } actions.finOnboard(); },
     finOnboard: () => { S.onboard = true; save(); pile.length = 0; aller('accueil', null, true); },
-    retourner: () => { bulleRetournee = !bulleRetournee; const b = app.querySelector('.bulle-etat'); if (b) b.classList.toggle('retournee', bulleRetournee); },
+    retourner: () => { const e = D.etats[S.etat]; if (!e.bulle || route.arg === 'collation') { if (e.special === 'pompe') toast('Demande à un adulte de reconnecter ta pompe.'); else if (!e.bulle && S.etat === 'attente') toast('Ton capteur se prépare. Ton chiffre revient bientôt !'); return; } bulleRetournee = !bulleRetournee; const b = app.querySelector('.bulle-etat'); if (b) b.classList.toggle('retournee', bulleRetournee); },
     toucherCompagnon: () => { sauter(app.querySelector('.compagnon > div'));
       if (S.etat === 'bas') aller('jus'); else if (S.etat === 'haut' || S.etat === 'tresHaut') { S.etat = 'zone'; save(); rendre(); toast('Ahhh, de l’eau fraîche ! Merci.'); } else toast(`${comp().nom} est content de te voir !`); },
     appelerMaman: (nom) => {

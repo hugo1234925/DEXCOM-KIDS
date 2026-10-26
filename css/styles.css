@@ -29,20 +29,19 @@
 html, body { margin: 0; height: 100%; }
 body {
   font-family: var(--police); color: var(--texte); background: #D8EEF6;
-  display: flex; align-items: center; justify-content: center; flex-direction: column;
-  -webkit-font-smoothing: antialiased; overflow: hidden;
+  -webkit-font-smoothing: antialiased; overflow: hidden; position: relative;
 }
 button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
 img { display: block; max-width: 100%; }
 :focus-visible { outline: 3px solid var(--renard-500); outline-offset: 3px; border-radius: 12px; }
 
 /* ---------- Scène téléphone ---------- */
-.stage { position: relative; width: 428px; height: var(--stage-h, 926px); transform-origin: top center; }
+.stage { position: absolute; left: 50%; top: 0; width: 428px; height: var(--stage-h, 926px); transform-origin: top center; }
 .app {
   position: absolute; inset: 0; overflow: hidden; background: var(--ciel-bas);
   border-radius: 44px; box-shadow: 0 20px 60px rgba(15, 59, 74, .25);
 }
-.desktop-note { font-size: 12px; color: var(--ciel-700); margin: 10px 0 0; text-align: center; }
+.desktop-note { position: absolute; left: 0; right: 0; font-size: 12px; color: var(--ciel-700); margin: 0; text-align: center; }
 @media (max-width: 500px) {
   body { background: var(--ciel-bas); }
   .app { border-radius: 0; box-shadow: none; }

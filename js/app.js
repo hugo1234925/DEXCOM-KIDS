@@ -17,6 +17,7 @@
     defis: { bolus: 2, sac: 3, jardin: 1 }, badges: ['courage', 'chasseur'],
     sons: true, vibrations: true, grandTexte: false,
     inscrit: false, lecture: 'simple', niveauAlertes: 'attentives', defisChoisis: ['bolus', 'sac', 'jardin'],
+    positions: {},
     profil: { prenom: 'Léo', nom: 'Tremblay', age: '9 ans', diabete: 'Type 1', capteur: 'Dexcom G7' },
     reg: { basse: true, haute: true, vite: false, nuit: true, ecole: true, seuilBas: 3.9, seuilHaut: 10, repeter: '15 min', son: 'Doux', calme: 'vib' }
   };
@@ -91,6 +92,18 @@
     const acc = (pose || opts.pose || opts.sansAcc) ? [] : S.porte.map(id => D.accessoires.find(a => a.id === id)).filter(Boolean);
     const accHTML = (a) => `<img class="acc" alt="" src="assets/objet/${a.id}.svg" style="left:${a.pos.x - a.pos.w / 2}%;top:${a.pos.y}%;width:${a.pos.w}%;${a.derriere ? 'z-index:-1' : ''}">`;
     return `<div style="position:relative;isolation:isolate">${acc.filter(a => a.derriere).map(accHTML).join('')}<img class="corps" src="${src}" alt="${esc(comp().nom)}${pose ? ' — ' + esc(etat.message) : ''}">${acc.filter(a => !a.derriere).map(accHTML).join('')}</div>`;
+  }
+
+  /* Écran d’accueil en miniature : décor, objets déplaçables, compagnon */
+  function sceneHTML() {
+    const objs = S.objetsPlaces.map(id => D.objets.find(o => o.id === id)).filter(Boolean).map(o => {
+      const q = S.positions[o.id] || o.place;
+      return `<img class="objet-decor glissable" data-obj="${o.id}" src="assets/objet/${o.id}.svg" alt="${o.nom}" role="button" tabindex="0" draggable="false" aria-label="${o.nom}. Glisse pour le déplacer, ou utilise les flèches du clavier." style="left:${q.x}px;top:${q.y}px">`;
+    }).join('');
+    return `<img class="decor" src="${decorSrc()}" alt="">
+      <img src="assets/bulle/zone.svg" alt="" style="position:absolute;left:176px;top:124px;width:240px;opacity:.85;pointer-events:none">
+      <div class="compagnon" style="pointer-events:none">${compagnonHTML({ neutre: true })}</div>${objs}
+      <div class="nav" style="pointer-events:none;opacity:.6" aria-hidden="true"></div>`;
   }
 
   /* ==========================================================
@@ -186,7 +199,7 @@
            <div class="chiffre-rond"><span class="val">${etat.val}</span><span class="unite">mmol/L</span><span class="fleche">${fleche(etat.fleche, S.etat === 'haut' || S.etat === 'tresHaut' ? '#14232B' : '#fff')}</span></div></div>`
       : `<div class="face icone"><svg viewBox="0 0 240 243" aria-hidden="true"><circle cx="120" cy="112" r="89" fill="#fff"/><circle cx="58" cy="214" r="18" fill="#fff"/><circle cx="34" cy="232" r="11" fill="#fff"/><circle cx="120" cy="112" r="82" fill="#32A3C9"/><circle cx="58" cy="214" r="13" fill="#32A3C9"/><circle cx="34" cy="232" r="7" fill="#32A3C9"/><path d="M106 86h28M106 138h28M110 86q0 20 10 26-10 6-10 26M130 86q0 20-10 26 10 6 10 26" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/></svg></div>`;
     const objets = S.objetsPlaces.map(id => D.objets.find(o => o.id === id)).filter(Boolean)
-      .map(o => `<img class="objet-decor" src="assets/objet/${o.id}.svg" alt="" style="left:${o.place.x}px;top:${o.place.y}px">`).join('');
+      .map(o => { const q = S.positions[o.id] || o.place; return `<img class="objet-decor" src="assets/objet/${o.id}.svg" alt="" style="left:${q.x}px;top:${q.y}px">`; }).join('');
     return `<section class="screen" aria-label="Accueil">
       <img class="decor" src="${decorSrc()}" alt="">
       ${objets}
@@ -460,13 +473,23 @@
     const contenu = vue === 'foxy'
       ? `<div class="apercu" style="background:linear-gradient(#8DD6EE,#E2F3FA)"><div style="position:absolute;left:50%;bottom:6px;width:190px;transform:translateX(-50%)">${compagnonHTML({ neutre: true })}</div></div>
          <div class="grille">${D.accessoires.map(a => tuile('acc', a)).join('')}</div>`
-      : `<div class="apercu"><img class="decor" src="${decorSrc()}" alt="">${S.objetsPlaces.map(id => D.objets.find(o => o.id === id)).filter(Boolean).map(o => `<img src="assets/objet/${o.id}.svg" alt="" style="position:absolute;width:56px;left:${(o.place.x / 428 * 100).toFixed(0)}%;top:${((o.place.y - 300) / 500 * 100).toFixed(0)}%">`).join('')}<div style="position:absolute;left:30px;bottom:6px;width:130px">${compagnonHTML({ neutre: true })}</div></div>
+      : `<div class="decor-tete">
+           <div class="scene-mini" aria-label="Aperçu de ton écran d’accueil"><div class="scene" style="left:0;transform:scale(.4206);transform-origin:0 0">${sceneHTML()}</div></div>
+           <div class="decor-aide"><h2 class="h3">Mon écran</h2><p class="petit" style="margin:6px 0 14px">Glisse les objets avec ton doigt pour les placer où tu veux.</p>
+             <button class="btn secondaire petit" style="width:100%" data-act="agrandir"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>Agrandir</button>
+             ${Object.keys(S.positions).length ? '<button class="btn lien petit" style="width:100%" data-act="replacer">Remettre en place</button>' : ''}
+             <p class="petit" style="margin-top:10px">${S.objetsPlaces.length} objet${S.objetsPlaces.length > 1 ? 's' : ''} sur 4</p></div>
+         </div>
          <p class="etiquette" style="margin-top:4px">Paysages · le ciel suit l’heure</p>
          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${D.lieux.map(l => tuile('lieu', l).replace('class="tuile', 'style="min-height:0;padding:6px" class="tuile')).join('')}</div>
          <p class="etiquette">Objets</p><div class="grille">${D.objets.map(o => tuile('obj', o)).join('')}</div>`;
     return `<section class="screen ciel" aria-label="Personnaliser">${statut()}
       <div class="entete" style="justify-content:space-between">${sel}${etoilesPill()}</div>
-      <div class="scroll">${contenu}</div>${nav('perso')}</section>`;
+      <div class="scroll">${contenu}</div>${nav('perso')}
+      ${vue === 'decor' && ui.grand ? `<div class="editeur" role="dialog" aria-label="Placer mes objets">
+        <div class="scene" style="transform:translateX(-50%) scale(${Math.min(1, (stage.offsetHeight || 926) / 926)})">${sceneHTML()}</div>
+        <p class="pastille editeur-aide">Glisse les objets où tu veux !</p>
+        <div class="actions-bas" style="bottom:36px"><button class="btn principal" data-act="fermerGrand">Terminé</button></div></div>` : ''}</section>`;
   };
 
   /* 9.1 Mon profil et réglages */
@@ -1008,7 +1031,7 @@
         if (S.porte.includes(id)) S.porte = S.porte.filter(x => x !== id);
         else S.porte = S.porte.filter(x => zoneDe(x) !== item.zone).concat(id);
       } else if (type === 'lieu') S.lieu = id;
-      else S.objetsPlaces = S.objetsPlaces.includes(id) ? S.objetsPlaces.filter(x => x !== id) : S.objetsPlaces.slice(-1).concat(id);
+      else S.objetsPlaces = S.objetsPlaces.includes(id) ? S.objetsPlaces.filter(x => x !== id) : S.objetsPlaces.slice(-3).concat(id);
       save(); rendre();
     },
     bascule: (cle) => { S[cle] = !S[cle]; save(); rendre(); },
@@ -1043,6 +1066,9 @@
     seuil: (arg) => { const [k, d] = arg.split(':'); const b = k === 'seuilBas' ? [3.1, 5.5] : [8, 15]; S.reg[k] = Math.round(Math.min(b[1], Math.max(b[0], S.reg[k] + d * 0.1)) * 10) / 10; save(); rendre(); },
     enregistrer: () => { save(); toast('Réglages enregistrés.'); retour(); },
     chipVisuel: (_, el) => { const on = el.getAttribute('aria-pressed') !== 'true'; el.setAttribute('aria-pressed', on); el.classList.toggle('actif', on); el.classList.toggle('gris', !on); },
+    agrandir: () => { ui.grand = true; rendre(); },
+    fermerGrand: () => { ui.grand = false; rendre(); toast('Ton décor est enregistré !'); },
+    replacer: () => { S.positions = {}; save(); rendre(); },
     reinit: () => { if (confirmerReinit()) { try { localStorage.removeItem('dk'); } catch (e) { /* rien */ } S = neuf(); ui = {}; pile.length = 0; aller('splash', null, true); } }
   };
   function confirmerReinit() { return window.confirm ? window.confirm('Recommencer la démo depuis le début ?') : true; }
@@ -1053,6 +1079,34 @@
     if (t.dataset.go) { ui = route.name === t.dataset.go ? ui : {}; aller(t.dataset.go, t.dataset.arg || null); return; }
     const f = actions[t.dataset.act]; if (f) f(t.dataset.arg, t);
   });
+  /* Glisser-déposer des objets du décor */
+  let glisse = null;
+  app.addEventListener('pointerdown', (e) => {
+    const o = e.target.closest('.scene [data-obj], .scene-mini [data-obj]'); if (!o) return;
+    e.preventDefault();
+    const k = o.parentElement.getBoundingClientRect().width / 428;
+    glisse = { o, k, id: o.dataset.obj, sx: e.clientX, sy: e.clientY, x: parseFloat(o.style.left), y: parseFloat(o.style.top) };
+    try { o.setPointerCapture(e.pointerId); } catch (err) { /* rien */ }
+    o.classList.add('tenu');
+  });
+  const borne = (x, y) => [Math.round(Math.max(-10, Math.min(428 - 64, x))), Math.round(Math.max(110, Math.min(820, y)))];
+  app.addEventListener('pointermove', (e) => {
+    if (!glisse) return; const g = glisse;
+    [g.nx, g.ny] = borne(g.x + (e.clientX - g.sx) / g.k, g.y + (e.clientY - g.sy) / g.k);
+    g.o.style.left = g.nx + 'px'; g.o.style.top = g.ny + 'px';
+  });
+  const lacher = () => {
+    if (!glisse) return; const g = glisse; glisse = null; g.o.classList.remove('tenu');
+    if (g.nx != null) { S.positions[g.id] = { x: g.nx, y: g.ny }; save(); app.querySelectorAll(`[data-obj="${g.id}"]`).forEach(el => { el.style.left = g.nx + 'px'; el.style.top = g.ny + 'px'; }); }
+  };
+  app.addEventListener('pointerup', lacher); app.addEventListener('pointercancel', lacher);
+  app.addEventListener('keydown', (e) => {
+    const o = e.target.closest && e.target.closest('[data-obj]'); if (!o) return;
+    const d = { ArrowLeft: [-10, 0], ArrowRight: [10, 0], ArrowUp: [0, -10], ArrowDown: [0, 10] }[e.key]; if (!d) return;
+    e.preventDefault(); const [x, y] = borne(parseFloat(o.style.left) + d[0], parseFloat(o.style.top) + d[1]);
+    S.positions[o.dataset.obj] = { x, y }; save(); app.querySelectorAll(`[data-obj="${o.dataset.obj}"]`).forEach(el => { el.style.left = x + 'px'; el.style.top = y + 'px'; });
+  });
+
   app.addEventListener('input', (e) => {
     const k = e.target.dataset && e.target.dataset.range; if (!k) return;
     S.reg[k] = Math.round(parseFloat(e.target.value) * 10) / 10; save();

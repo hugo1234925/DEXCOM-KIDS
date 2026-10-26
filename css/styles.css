@@ -248,3 +248,16 @@ input[type=range].seuil { width: 100%; accent-color: var(--c, #D12F2F); height: 
 .btn-moins { width: 56px; height: 56px; border-radius: 50%; background: #E2F3FA; color: #25728C; font-size: 32px; font-weight: 600; flex: none; }
 .appel-btn { position: absolute; top: 372px; right: 24px; height: 52px; padding: 0 22px; border-radius: 26px; background: #D12F2F; color: #fff; font-size: 17px; font-weight: 600; z-index: 3; }
 .pastille-etat { position: absolute; top: 372px; right: 24px; height: 36px; padding: 0 16px; border-radius: 18px; background: #fff; border: 2px solid #14232B; color: #14232B; font-size: 14px; font-weight: 500; display: flex; align-items: center; z-index: 3; white-space: nowrap; }
+
+/* ---------- Placer les objets du décor ---------- */
+.decor-tete { display: flex; gap: 16px; align-items: center; margin: 8px 0 4px; }
+.scene-mini { position: relative; width: 180px; height: 389px; flex: none; border-radius: 22px; overflow: hidden; border: 3px solid #fff; box-shadow: 0 6px 18px rgba(20, 35, 43, .15); }
+.scene { position: absolute; top: 0; width: 428px; height: 926px; overflow: hidden; background: var(--ciel-bas); }
+.decor-aide { flex: 1; min-width: 0; }
+.glissable { cursor: grab; touch-action: none; user-select: none; -webkit-user-drag: none; z-index: 3 !important; transition: transform .15s, filter .15s; }
+.glissable:hover { filter: drop-shadow(0 0 6px rgba(255, 255, 255, .9)); }
+.glissable:focus-visible { outline: 3px solid #FE9732; outline-offset: 4px; border-radius: 8px; }
+.glissable.tenu { cursor: grabbing; transform: scale(1.15); filter: drop-shadow(0 8px 10px rgba(20, 35, 43, .35)); }
+.editeur { position: absolute; inset: 0; z-index: 30; background: #14232B; animation: fondu .2s; }
+.editeur .scene { left: 50%; transform-origin: top center; }
+.editeur-aide { position: absolute; top: 56px; left: 50%; transform: translateX(-50%); z-index: 5; color: #14232B; box-shadow: 0 4px 12px rgba(0,0,0,.15); white-space: nowrap; }

@@ -511,7 +511,7 @@
       ? `<div class="apercu" style="background:linear-gradient(#8DD6EE,#E2F3FA);height:320px;user-select:none"><div style="position:absolute;left:50%;bottom:8px;width:200px;z-index:1;transform:translateX(-50%)">${compagnonHTML({ neutre: true, edit: true })}</div>
            <span class="pastille" style="position:absolute;left:10px;top:10px;font-size:13px;padding:6px 12px;pointer-events:none;z-index:0">Glisse ${S.porte.length > 1 ? 'les accessoires' : 'l’accessoire'} où tu veux</span>
            <button class="btn-rond" data-act="agrandirAcc" aria-label="Agrandir" style="position:absolute;right:10px;bottom:10px;width:44px;height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="#25728C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button>
-           ${S.porte.some(id => (S.accPos || {})[S.compagnon + ':' + id]) ? '<button class="pastille" data-act="replacerAcc" style="position:absolute;left:10px;bottom:10px;font-size:13px;padding:6px 12px;color:#25728C">Remettre en place</button>' : ''}</div>
+           ${S.porte.some(id => (S.accPos || {})[S.compagnon + ':' + id]) ? '<button class="pastille" data-act="replacerAcc" style="position:absolute;left:10px;bottom:10px;font-size:13px;padding:6px 12px;color:#25728C;z-index:3;box-shadow:0 2px 8px rgba(20,35,43,.15)">Remettre en place</button>' : ''}</div>
          <div class="grille">${D.accessoires.map(a => tuile('acc', a)).join('')}</div>`
       : `<div class="decor-tete">
            <div class="scene-mini" aria-label="Aperçu de ton écran d’accueil"><div class="scene" style="left:0;transform:scale(.4206);transform-origin:0 0">${sceneHTML()}</div></div>

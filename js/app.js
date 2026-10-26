@@ -17,7 +17,7 @@
     defis: { bolus: 2, sac: 3, jardin: 1 }, badges: ['courage', 'chasseur'],
     sons: true, vibrations: true, grandTexte: false,
     inscrit: false, lecture: 'simple', niveauAlertes: 'attentives', defisChoisis: ['bolus', 'sac', 'jardin'],
-    positions: {},
+    positions: {}, accPos: {}, tailles: {},
     profil: { prenom: 'Léo', nom: 'Tremblay', age: '9 ans', diabete: 'Type 1', capteur: 'Dexcom G7' },
     reg: { basse: true, haute: true, vite: false, nuit: true, ecole: true, seuilBas: 3.9, seuilHaut: 10, repeter: '15 min', son: 'Doux', calme: 'vib' }
   };
@@ -85,20 +85,24 @@
   }
 
   /* Compagnon avec accessoires portés */
+  const accPos = (a) => Object.assign({}, a.pos, (S.accPos || {})[S.compagnon + ':' + a.id] || {});
   function compagnonHTML(opts = {}) {
     const etat = D.etats[S.etat];
     const pose = !opts.neutre && etat.pose && S.compagnon === 'renard' ? etat.pose : null;
     const src = opts.pose ? `assets/pose/${opts.pose}.svg` : pose ? `assets/pose/${pose}.svg` : `assets/compagnon/${S.compagnon}.svg`;
     const acc = (pose || opts.pose || opts.sansAcc) ? [] : S.porte.map(id => D.accessoires.find(a => a.id === id)).filter(Boolean);
-    const accHTML = (a) => `<img class="acc" alt="" src="assets/objet/${a.id}.svg" style="left:${a.pos.x - a.pos.w / 2}%;top:${a.pos.y}%;width:${a.pos.w}%;${a.derriere ? 'z-index:-1' : ''}">`;
+    const accHTML = (a) => { const q = accPos(a); return opts.edit
+      ? `<img class="acc glissable-acc ${ui.accSel === a.id ? 'choisi' : ''}" data-acc="${a.id}" src="assets/objet/${a.id}.svg" alt="${a.nom}" role="button" tabindex="0" draggable="false" aria-label="${a.nom}. Glisse pour le placer sur ${esc(comp().nom)}, ou utilise les flèches du clavier." style="left:${q.x - q.w / 2}%;top:${q.y}%;width:${q.w}%;${a.derriere ? 'z-index:-1' : ''}">`
+      : `<img class="acc" alt="" src="assets/objet/${a.id}.svg" style="left:${q.x - q.w / 2}%;top:${q.y}%;width:${q.w}%;${a.derriere ? 'z-index:-1' : ''}">`; };
     return `<div style="position:relative;isolation:isolate">${acc.filter(a => a.derriere).map(accHTML).join('')}<img class="corps" src="${src}" alt="${esc(comp().nom)}${pose ? ' — ' + esc(etat.message) : ''}">${acc.filter(a => !a.derriere).map(accHTML).join('')}</div>`;
   }
 
   /* Écran d’accueil en miniature : décor, objets déplaçables, compagnon */
+  const objW = (id) => Math.round(74 * ((S.tailles || {})[id] || 1));
   function sceneHTML() {
     const objs = S.objetsPlaces.map(id => D.objets.find(o => o.id === id)).filter(Boolean).map(o => {
       const q = S.positions[o.id] || o.place;
-      return `<img class="objet-decor glissable" data-obj="${o.id}" src="assets/objet/${o.id}.svg" alt="${o.nom}" role="button" tabindex="0" draggable="false" aria-label="${o.nom}. Glisse pour le déplacer, ou utilise les flèches du clavier." style="left:${q.x}px;top:${q.y}px">`;
+      return `<img class="objet-decor glissable" data-obj="${o.id}" src="assets/objet/${o.id}.svg" alt="${o.nom}" role="button" tabindex="0" draggable="false" aria-label="${o.nom}. Glisse pour le déplacer, ou utilise les flèches du clavier." style="left:${q.x}px;top:${q.y}px;width:${objW(o.id)}px" data-choisi="${ui.objSel === o.id}">`;
     }).join('');
     return `<img class="decor" src="${decorSrc()}" alt="">
       <img src="assets/bulle/zone.svg" alt="" style="position:absolute;left:176px;top:124px;width:240px;opacity:.85;pointer-events:none">
@@ -199,7 +203,7 @@
            <div class="chiffre-rond"><span class="val">${etat.val}</span><span class="unite">mmol/L</span><span class="fleche">${fleche(etat.fleche, S.etat === 'haut' || S.etat === 'tresHaut' ? '#14232B' : '#fff')}</span></div></div>`
       : `<div class="face icone"><svg viewBox="0 0 240 243" aria-hidden="true"><circle cx="120" cy="112" r="89" fill="#fff"/><circle cx="58" cy="214" r="18" fill="#fff"/><circle cx="34" cy="232" r="11" fill="#fff"/><circle cx="120" cy="112" r="82" fill="#32A3C9"/><circle cx="58" cy="214" r="13" fill="#32A3C9"/><circle cx="34" cy="232" r="7" fill="#32A3C9"/><path d="M106 86h28M106 138h28M110 86q0 20 10 26-10 6-10 26M130 86q0 20-10 26 10 6 10 26" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/></svg></div>`;
     const objets = S.objetsPlaces.map(id => D.objets.find(o => o.id === id)).filter(Boolean)
-      .map(o => { const q = S.positions[o.id] || o.place; return `<img class="objet-decor" src="assets/objet/${o.id}.svg" alt="" style="left:${q.x}px;top:${q.y}px">`; }).join('');
+      .map(o => { const q = S.positions[o.id] || o.place; return `<img class="objet-decor" src="assets/objet/${o.id}.svg" alt="" style="left:${q.x}px;top:${q.y}px;width:${objW(o.id)}px">`; }).join('');
     return `<section class="screen" aria-label="Accueil">
       <img class="decor" src="${decorSrc()}" alt="">
       ${objets}
@@ -471,13 +475,16 @@
         aria-label="${item.nom}. ${actif ? 'Actif' : possede ? 'Débloqué' : item.defi ? 'Se gagne avec le ' + item.defi : item.prix + ' étoiles'}">${img}<span class="nom">${item.nom}</span><span class="etat">${etat}</span></button>`;
     };
     const contenu = vue === 'foxy'
-      ? `<div class="apercu" style="background:linear-gradient(#8DD6EE,#E2F3FA)"><div style="position:absolute;left:50%;bottom:6px;width:190px;transform:translateX(-50%)">${compagnonHTML({ neutre: true })}</div></div>
+      ? `<div class="apercu" style="background:linear-gradient(#8DD6EE,#E2F3FA);height:320px;user-select:none"><div style="position:absolute;left:50%;bottom:8px;width:200px;z-index:1;transform:translateX(-50%)">${compagnonHTML({ neutre: true, edit: true })}</div>
+           <span class="pastille" style="position:absolute;left:10px;top:10px;font-size:13px;padding:6px 12px;pointer-events:none;z-index:0">Glisse ${S.porte.length > 1 ? 'les accessoires' : 'l’accessoire'} où tu veux</span>
+           <button class="btn-rond" data-act="agrandirAcc" aria-label="Agrandir" style="position:absolute;right:10px;bottom:10px;width:44px;height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="#25728C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button>
+           ${S.porte.some(id => (S.accPos || {})[S.compagnon + ':' + id]) ? '<button class="pastille" data-act="replacerAcc" style="position:absolute;left:10px;bottom:10px;font-size:13px;padding:6px 12px;color:#25728C">Remettre en place</button>' : ''}</div>
          <div class="grille">${D.accessoires.map(a => tuile('acc', a)).join('')}</div>`
       : `<div class="decor-tete">
            <div class="scene-mini" aria-label="Aperçu de ton écran d’accueil"><div class="scene" style="left:0;transform:scale(.4206);transform-origin:0 0">${sceneHTML()}</div></div>
-           <div class="decor-aide"><h2 class="h3">Mon écran</h2><p class="petit" style="margin:6px 0 14px">Glisse les objets avec ton doigt pour les placer où tu veux.</p>
+           <div class="decor-aide"><h2 class="h3">Mon écran</h2><p class="petit" style="margin:6px 0 14px">Glisse les objets avec ton doigt pour les placer où tu veux. Agrandis l’écran pour changer leur taille.</p>
              <button class="btn secondaire petit" style="width:100%" data-act="agrandir"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>Agrandir</button>
-             ${Object.keys(S.positions).length ? '<button class="btn lien petit" style="width:100%" data-act="replacer">Remettre en place</button>' : ''}
+             ${Object.keys(S.positions).length || Object.keys(S.tailles).length ? '<button class="btn lien petit" style="width:100%" data-act="replacer">Remettre en place</button>' : ''}
              <p class="petit" style="margin-top:10px">${S.objetsPlaces.length} objet${S.objetsPlaces.length > 1 ? 's' : ''} sur 4</p></div>
          </div>
          <p class="etiquette" style="margin-top:4px">Paysages · le ciel suit l’heure</p>
@@ -486,10 +493,20 @@
     return `<section class="screen ciel" aria-label="Personnaliser">${statut()}
       <div class="entete" style="justify-content:space-between">${sel}${etoilesPill()}</div>
       <div class="scroll">${contenu}</div>${nav('perso')}
+      ${vue === 'foxy' && ui.grandAcc ? (() => { const sel = D.accessoires.find(a => a.id === ui.accSel && S.porte.includes(a.id)); return `<div class="editeur" role="dialog" aria-label="Placer mes accessoires" style="background:linear-gradient(#8DD6EE,#E2F3FA)">
+        <img class="decor" src="${decorSrc()}" alt="" style="opacity:.55">
+        <p class="pastille editeur-aide">Glisse les accessoires sur ${esc(comp().nom)} !</p>
+        <div style="position:absolute;left:50%;top:150px;width:330px;transform:translateX(-50%)">${compagnonHTML({ neutre: true, edit: true })}</div>
+        <div class="actions-bas" style="bottom:36px">
+          ${sel ? `<div class="carte" style="display:flex;align-items:center;gap:10px;padding:10px 14px"><img src="assets/objet/${sel.id}.svg" alt="" width="36"><b style="flex:1;font-weight:600">${sel.nom}</b><button class="btn-moins" style="width:48px;height:48px;font-size:26px" data-act="accTaille" data-arg="-1" aria-label="Plus petit">–</button><button class="btn-moins" style="width:48px;height:48px;font-size:26px" data-act="accTaille" data-arg="1" aria-label="Plus grand">+</button></div>` : '<p class="pastille" style="justify-self:center;font-size:13px">Touche un accessoire pour changer sa taille</p>'}
+          <button class="btn principal" data-act="fermerGrandAcc">Terminé</button></div></div>`; })() : ''}
       ${vue === 'decor' && ui.grand ? `<div class="editeur" role="dialog" aria-label="Placer mes objets">
         <div class="scene" style="transform:translateX(-50%) scale(${Math.min(1, (stage.offsetHeight || 926) / 926)})">${sceneHTML()}</div>
         <p class="pastille editeur-aide">Glisse les objets où tu veux !</p>
-        <div class="actions-bas" style="bottom:36px"><button class="btn principal" data-act="fermerGrand">Terminé</button></div></div>` : ''}</section>`;
+        <div class="actions-bas" style="bottom:36px">${(() => { const o = D.objets.find(x => x.id === ui.objSel && S.objetsPlaces.includes(x.id)); return o
+          ? `<div class="carte" style="display:flex;align-items:center;gap:10px;padding:10px 14px"><img src="assets/objet/${o.id}.svg" alt="" width="36"><b style="flex:1;font-weight:600">${o.nom}</b><button class="btn-moins" style="width:48px;height:48px;font-size:26px" data-act="objTaille" data-arg="-1" aria-label="Plus petit">–</button><button class="btn-moins" style="width:48px;height:48px;font-size:26px" data-act="objTaille" data-arg="1" aria-label="Plus grand">+</button></div>`
+          : '<p class="pastille" style="justify-self:center;font-size:13px">Touche un objet pour changer sa taille</p>'; })()}
+          <button class="btn principal" data-act="fermerGrand">Terminé</button></div></div>` : ''}</section>`;
   };
 
   /* 9.1 Mon profil et réglages */
@@ -1066,9 +1083,14 @@
     seuil: (arg) => { const [k, d] = arg.split(':'); const b = k === 'seuilBas' ? [3.1, 5.5] : [8, 15]; S.reg[k] = Math.round(Math.min(b[1], Math.max(b[0], S.reg[k] + d * 0.1)) * 10) / 10; save(); rendre(); },
     enregistrer: () => { save(); toast('Réglages enregistrés.'); retour(); },
     chipVisuel: (_, el) => { const on = el.getAttribute('aria-pressed') !== 'true'; el.setAttribute('aria-pressed', on); el.classList.toggle('actif', on); el.classList.toggle('gris', !on); },
+    agrandirAcc: () => { ui.grandAcc = true; rendre(); },
+    fermerGrandAcc: () => { ui.grandAcc = false; ui.accSel = null; rendre(); toast(`${comp().nom} est prêt !`); },
+    replacerAcc: () => { S.porte.forEach(id => { delete S.accPos[S.compagnon + ':' + id]; }); save(); rendre(); },
+    accTaille: (d) => { const a = D.accessoires.find(x => x.id === ui.accSel); if (!a) return; const q = accPos(a); const k = S.compagnon + ':' + a.id; S.accPos[k] = { x: q.x, y: q.y, w: Math.round(Math.max(12, Math.min(110, q.w * (d > 0 ? 1.12 : 1 / 1.12)))) }; save(); rendre(); },
+    objTaille: (d) => { const id = ui.objSel; if (!id) return; S.tailles[id] = Math.round(Math.max(0.5, Math.min(2.5, ((S.tailles || {})[id] || 1) * (d > 0 ? 1.15 : 1 / 1.15))) * 100) / 100; save(); rendre(); },
     agrandir: () => { ui.grand = true; rendre(); },
-    fermerGrand: () => { ui.grand = false; rendre(); toast('Ton décor est enregistré !'); },
-    replacer: () => { S.positions = {}; save(); rendre(); },
+    fermerGrand: () => { ui.grand = false; ui.objSel = null; rendre(); toast('Ton décor est enregistré !'); },
+    replacer: () => { S.positions = {}; S.tailles = {}; save(); rendre(); },
     reinit: () => { if (confirmerReinit()) { try { localStorage.removeItem('dk'); } catch (e) { /* rien */ } S = neuf(); ui = {}; pile.length = 0; aller('splash', null, true); } }
   };
   function confirmerReinit() { return window.confirm ? window.confirm('Recommencer la démo depuis le début ?') : true; }
@@ -1081,6 +1103,35 @@
   });
   /* Glisser-déposer des objets du décor */
   let glisse = null;
+  /* Glisser-déposer des accessoires sur le compagnon */
+  let glisseAcc = null;
+  const placerAcc = (id, q) => app.querySelectorAll(`[data-acc="${id}"]`).forEach(el => { el.style.left = (q.x - q.w / 2) + '%'; el.style.top = q.y + '%'; el.style.width = q.w + '%'; });
+  app.addEventListener('pointerdown', (e) => {
+    const o = e.target.closest('[data-acc]'); if (!o) return;
+    e.preventDefault(); const a = D.accessoires.find(x => x.id === o.dataset.acc); const r = o.parentElement.getBoundingClientRect();
+    glisseAcc = { o, a, r, sx: e.clientX, sy: e.clientY, q: accPos(a) };
+    try { o.setPointerCapture(e.pointerId); } catch (err) { /* rien */ }
+    o.classList.add('tenu');
+  });
+  app.addEventListener('pointermove', (e) => {
+    if (!glisseAcc) return; const g = glisseAcc;
+    g.n = { x: Math.round(Math.max(0, Math.min(100, g.q.x + (e.clientX - g.sx) / g.r.width * 100)) * 10) / 10, y: Math.round(Math.max(-45, Math.min(95, g.q.y + (e.clientY - g.sy) / g.r.height * 100)) * 10) / 10, w: g.q.w };
+    placerAcc(g.a.id, g.n);
+  });
+  const lacherAcc = () => {
+    if (!glisseAcc) return; const g = glisseAcc; glisseAcc = null; g.o.classList.remove('tenu');
+    if (g.n) { S.accPos[S.compagnon + ':' + g.a.id] = g.n; save(); }
+    if (app.querySelector('.editeur') && ui.accSel !== g.a.id) { ui.accSel = g.a.id; rendre(); }
+  };
+  app.addEventListener('pointerup', lacherAcc); app.addEventListener('pointercancel', lacherAcc);
+  app.addEventListener('keydown', (e) => {
+    const o = e.target.closest && e.target.closest('[data-acc]'); if (!o) return;
+    const d = { ArrowLeft: [-2, 0], ArrowRight: [2, 0], ArrowUp: [0, -2], ArrowDown: [0, 2] }[e.key]; if (!d) return;
+    e.preventDefault(); const a = D.accessoires.find(x => x.id === o.dataset.acc); const q = accPos(a);
+    const n = { x: Math.max(0, Math.min(100, q.x + d[0])), y: Math.max(-45, Math.min(95, q.y + d[1])), w: q.w };
+    S.accPos[S.compagnon + ':' + a.id] = n; save(); placerAcc(a.id, n);
+  });
+
   app.addEventListener('pointerdown', (e) => {
     const o = e.target.closest('.scene [data-obj], .scene-mini [data-obj]'); if (!o) return;
     e.preventDefault();
@@ -1098,6 +1149,7 @@
   const lacher = () => {
     if (!glisse) return; const g = glisse; glisse = null; g.o.classList.remove('tenu');
     if (g.nx != null) { S.positions[g.id] = { x: g.nx, y: g.ny }; save(); app.querySelectorAll(`[data-obj="${g.id}"]`).forEach(el => { el.style.left = g.nx + 'px'; el.style.top = g.ny + 'px'; }); }
+    if (app.querySelector('.editeur') && ui.objSel !== g.id) { ui.objSel = g.id; rendre(); }
   };
   app.addEventListener('pointerup', lacher); app.addEventListener('pointercancel', lacher);
   app.addEventListener('keydown', (e) => {

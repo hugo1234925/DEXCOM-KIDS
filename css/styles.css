@@ -261,3 +261,8 @@ input[type=range].seuil { width: 100%; accent-color: var(--c, #D12F2F); height: 
 .editeur { position: absolute; inset: 0; z-index: 30; background: #14232B; animation: fondu .2s; }
 .editeur .scene { left: 50%; transform-origin: top center; }
 .editeur-aide { position: absolute; top: 56px; left: 50%; transform: translateX(-50%); z-index: 5; color: #14232B; box-shadow: 0 4px 12px rgba(0,0,0,.15); white-space: nowrap; }
+.acc.glissable-acc { pointer-events: auto; cursor: grab; touch-action: none; user-select: none; -webkit-user-drag: none; transition: filter .15s; }
+.acc.glissable-acc:hover, .acc.glissable-acc.choisi { filter: drop-shadow(0 0 5px rgba(255, 255, 255, .95)) drop-shadow(0 0 2px #25728C); }
+.acc.glissable-acc:focus-visible { outline: 3px solid #FE9732; outline-offset: 3px; border-radius: 6px; }
+.acc.glissable-acc.tenu { cursor: grabbing; filter: drop-shadow(0 8px 10px rgba(20, 35, 43, .35)); }
+.glissable[data-choisi="true"] { filter: drop-shadow(0 0 5px rgba(255, 255, 255, .95)) drop-shadow(0 0 2px #25728C); }

@@ -85,11 +85,13 @@
   }
 
   /* Compagnon avec accessoires portés */
+  /* Émotions : foxy-faim → mouffy-faim ou zib-faim selon le compagnon */
+  const poseDe = (p) => p && p.replace('foxy', { renard: 'foxy', moufette: 'mouffy', alien: 'zib' }[S.compagnon] || 'foxy');
   const accPos = (a) => Object.assign({}, a.pos, (S.accPos || {})[S.compagnon + ':' + a.id] || {});
   function compagnonHTML(opts = {}) {
     const etat = D.etats[S.etat];
-    const pose = !opts.neutre && etat.pose && S.compagnon === 'renard' ? etat.pose : null;
-    const src = opts.pose ? `assets/pose/${opts.pose}.svg` : pose ? `assets/pose/${pose}.svg` : `assets/compagnon/${S.compagnon}.svg`;
+    const pose = !opts.neutre && etat.pose ? poseDe(etat.pose) : null;
+    const src = opts.pose ? `assets/pose/${poseDe(opts.pose)}.svg` : pose ? `assets/pose/${pose}.svg` : `assets/compagnon/${S.compagnon}.svg`;
     const acc = (pose || opts.pose || opts.sansAcc) ? [] : S.porte.map(id => D.accessoires.find(a => a.id === id)).filter(Boolean);
     const accHTML = (a) => { const q = accPos(a); return opts.edit
       ? `<img class="acc glissable-acc ${ui.accSel === a.id ? 'choisi' : ''}" data-acc="${a.id}" src="assets/objet/${a.id}.svg" alt="${a.nom}" role="button" tabindex="0" draggable="false" aria-label="${a.nom}. Glisse pour le placer sur ${esc(comp().nom)}, ou utilise les flèches du clavier." style="left:${q.x - q.w / 2}%;top:${q.y}%;width:${q.w}%;${a.derriere ? 'z-index:-1' : ''}">`
@@ -227,7 +229,7 @@
     return `<section class="screen" aria-label="Foxy boit son jus">
       <img class="decor" src="${decorSrc()}" alt="">${statut()}
       <p class="dialogue" style="top:240px;left:110px;width:210px">Glou glou… Merci ! Mon énergie remonte.</p>
-      <div class="compagnon" style="left:110px;top:400px;width:210px">${compagnonHTML({ pose: S.compagnon === 'renard' ? 'foxy-jus' : null })}</div>
+      <div class="compagnon" style="left:110px;top:400px;width:210px">${compagnonHTML({ pose: 'foxy-jus' })}</div>
     </section>`;
   };
 
@@ -271,7 +273,7 @@
       <div style="position:relative;width:200px;height:200px;margin:16px auto 0;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 0 0 8px rgba(255,255,255,.25)">
         <div class="centre"><b style="font-size:52px;color:#8E1B1B;line-height:1">2,9</b><div class="petit">mmol/L</div><div style="margin:6px auto 0;width:44px;height:44px;border-radius:50%;background:#8E1B1B;display:grid;place-items:center">${fleche('bas')}</div></div>
       </div>
-      <img src="assets/pose/foxy-dodo.svg" alt="" style="width:150px;margin:20px auto 0">
+      <img src="assets/pose/${poseDe('foxy-dodo')}.svg" alt="" style="width:150px;margin:20px auto 0">
       <h1 id="t-urg" class="centre" style="font-size:22px;margin:16px 24px 0;font-weight:600">Je n’ai plus d’énergie.</h1>
       <p id="d-urg" class="centre txt" style="margin:4px 24px 0">Va voir un adulte tout de suite.</p>
       <div class="actions-bas" style="bottom:30px">
@@ -803,13 +805,13 @@
       const arc = document.getElementById('arcR'); if (arc) arc.setAttribute('stroke-dasharray', `${(22 - ui.min) / 22 * 503} 503`);
       if (ui.min <= 0) { clearInterval(ui.chrono2); ui = {}; actions.capteurPret(); }
     }, 220);
-    const dodo = S.compagnon === 'renard';
+    const dodo = true;
     return `<section class="screen ciel" aria-labelledby="t-rvl"><img class="decor" src="${decorSrc('prairie')}" alt="">${statut()}
       <div style="position:relative;padding:20px 24px 0;text-align:center">
         <h1 id="t-rvl" class="h2">Ton capteur se réveille</h1>
         <div style="position:relative;width:200px;height:200px;margin:16px auto 0"><svg viewBox="0 0 200 200" width="200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="#fff"/><circle cx="100" cy="100" r="80" fill="none" stroke="#CDEBF5" stroke-width="10"/><circle id="arcR" cx="100" cy="100" r="80" fill="none" stroke="#32A3C9" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 503" transform="rotate(-90 100 100)"/></svg>
           <div style="position:absolute;inset:0;display:grid;place-content:center"><b id="minR" style="font-size:24px;font-weight:600;color:#25728C">${ui.min} min</b><span class="petit">environ</span></div></div>
-        <div style="position:relative;width:160px;margin:18px auto 0"><img src="assets/${dodo ? 'pose/foxy-dodo' : 'compagnon/' + S.compagnon}.svg" alt="" style="width:160px"><span style="position:absolute;right:-90px;top:10px;font-size:24px;font-weight:600;color:#25728C">Z z z</span></div>
+        <div style="position:relative;width:160px;margin:18px auto 0"><img src="assets/${dodo ? 'pose/' + poseDe('foxy-dodo') : 'compagnon/' + S.compagnon}.svg" alt="" style="width:160px"><span style="position:absolute;right:-90px;top:10px;font-size:24px;font-weight:600;color:#25728C">Z z z</span></div>
         <div class="carte" style="border-radius:20px;margin-top:20px"><p class="txt">« Je fais une petite sieste. Je te réveille quand c’est prêt ! »</p></div>
       </div>
       <div class="actions-bas" style="bottom:70px"><button class="btn secondaire" data-tab="perso">Décorer ma chambre en attendant</button></div></section>`;

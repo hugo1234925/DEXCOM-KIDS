@@ -15,7 +15,7 @@
     possede: { acc: ['chapeau-de-magicien', 'casquette', 'foulard', 'noeud-papillon', 'chapeau-de-cowboy'], lieux: ['prairie', 'desert'], obj: ['cerf-volant', 'tente', 'ballons'] },
     album: ['pomme', 'carotte', 'jus', 'oeuf', 'pates', 'brocoli', 'barre-granola'],
     defis: { bolus: 2, sac: 3, jardin: 1 }, badges: ['courage', 'chasseur'],
-    sons: true, vibrations: true, grandTexte: false,
+    sons: true, vibrations: true, grandTexte: false, moinsAnim: false,
     inscrit: false, lecture: 'simple', niveauAlertes: 'attentives', defisChoisis: ['bolus', 'sac', 'jardin'],
     positions: {}, accPos: {}, tailles: {},
     profil: { prenom: 'Léo', nom: 'Tremblay', age: '9 ans', diabete: 'Type 1', capteur: 'Dexcom G7' },
@@ -85,6 +85,33 @@
   }
 
   /* Compagnon avec accessoires portés */
+  /* Animations des compagnons : SVG chargés en ligne pour animer les yeux et la queue */
+  const SVG = {};
+  Promise.all(['renard', 'moufette', 'alien'].map(id => fetch(`assets/compagnon/${id}.svg`).then(r => r.ok ? r.text() : '').then(t => {
+    if (t) SVG[id] = t.replace(/<svg([^>]*?) width="[^"]*" height="[^"]*"/, '<svg$1 aria-hidden="true" focusable="false" style="width:100%;height:auto;display:block"');
+  }).catch(() => {}))).then(() => { if (Object.keys(SVG).length) rendre(); });
+  const PIVOT = { renard: '155px 300px', moufette: '155px 300px', alien: '140px 262px' };
+  function animerParties() {
+    app.querySelectorAll('.corps-svg:not([data-pret])').forEach(el => {
+      el.dataset.pret = '1'; const svg = el.querySelector('svg'); if (!svg) return;
+      const sombres = ['#381706', '#3e8a22', '#719417'];
+      const deja = new Set();
+      svg.querySelectorAll('path, g[mask], ellipse, circle').forEach(n => {
+        if (n.closest('defs, mask, clipPath')) return;
+        for (let x = n.parentNode; x && x !== svg; x = x.parentNode) if (deja.has(x)) return;
+        let b; try { b = n.getBBox(); } catch (e) { return; }
+        if (!b.width) return;
+        const cx = b.x + b.width / 2, cy = b.y + b.height / 2, fill = (n.getAttribute('fill') || '').toLowerCase();
+        if (cy > 70 && cy < 125 && cx > 70 && cx < 192 && b.width < 52 && b.height < 55 && fill !== '#ff9eb8') {
+          n.classList.add('oeil'); deja.add(n);
+        } else if (n.tagName === 'path' && b.x + b.width < 168 && b.y > 240 && b.height < 100 && !sombres.includes(fill)) {
+          n.classList.add('queue'); n.style.transformOrigin = PIVOT[el.dataset.comp]; deja.add(n);
+        }
+      });
+    });
+  }
+  const sauter = (el) => { if (!el) return; el.classList.remove('saute'); void el.offsetWidth; el.classList.add('saute'); setTimeout(() => el.classList.remove('saute'), 700); };
+
   /* Émotions : foxy-faim → mouffy-faim ou zib-faim selon le compagnon */
   const poseDe = (p) => p && p.replace('foxy', { renard: 'foxy', moufette: 'mouffy', alien: 'zib' }[S.compagnon] || 'foxy');
   const accPos = (a) => Object.assign({}, a.pos, (S.accPos || {})[S.compagnon + ':' + a.id] || {});
@@ -96,7 +123,11 @@
     const accHTML = (a) => { const q = accPos(a); return opts.edit
       ? `<img class="acc glissable-acc ${ui.accSel === a.id ? 'choisi' : ''}" data-acc="${a.id}" src="assets/objet/${a.id}.svg" alt="${a.nom}" role="button" tabindex="0" draggable="false" aria-label="${a.nom}. Glisse pour le placer sur ${esc(comp().nom)}, ou utilise les flèches du clavier." style="left:${q.x - q.w / 2}%;top:${q.y}%;width:${q.w}%;${a.derriere ? 'z-index:-1' : ''}">`
       : `<img class="acc" alt="" src="assets/objet/${a.id}.svg" style="left:${q.x - q.w / 2}%;top:${q.y}%;width:${q.w}%;${a.derriere ? 'z-index:-1' : ''}">`; };
-    return `<div style="position:relative;isolation:isolate">${acc.filter(a => a.derriere).map(accHTML).join('')}<img class="corps" src="${src}" alt="${esc(comp().nom)}${pose ? ' — ' + esc(etat.message) : ''}">${acc.filter(a => !a.derriere).map(accHTML).join('')}</div>`;
+    const p = opts.pose ? poseDe(opts.pose) : pose;
+    const anim = !p ? 'vivant' : /dodo/.test(p) ? 'dort' : /faim|soif/.test(p) ? 'inquiet' : 'vivant';
+    const alt = `${esc(comp().nom)}${pose ? ' — ' + esc(etat.message) : ''}`;
+    const corps = !p && SVG[S.compagnon] ? `<span class="corps corps-svg" data-comp="${S.compagnon}" role="img" aria-label="${alt}">${SVG[S.compagnon]}</span>` : `<img class="corps" src="${src}" alt="${alt}">`;
+    return `<div class="${anim}" style="position:relative;isolation:isolate">${acc.filter(a => a.derriere).map(accHTML).join('')}${corps}${acc.filter(a => !a.derriere).map(accHTML).join('')}</div>`;
   }
 
   /* Écran d’accueil en miniature : décor, objets déplaçables, compagnon */
@@ -136,7 +167,7 @@
         <p class="txt" style="margin-top:8px">Il t’accompagnera chaque jour et portera un capteur comme toi.</p>
       </div>
       <div style="position:relative;flex:1;display:flex;align-items:flex-end;justify-content:center">
-        <img src="assets/compagnon/${c.id}.svg" alt="${c.nom}, ${c.espece}" style="width:300px;margin-bottom:8px">
+        <img class="vivant" src="assets/compagnon/${c.id}.svg" alt="${c.nom}, ${c.espece}" style="width:300px;margin-bottom:8px">
       </div>
       <div style="position:relative;text-align:center">
         <span class="pastille" style="font-size:20px;font-weight:600;color:#25728C;padding:10px 40px">${c.nom}</span>
@@ -157,7 +188,7 @@
     const rond = (fond, contenu) => `<div style="width:80px;height:80px;border-radius:50%;background:${fond};display:grid;place-items:center;margin:0 auto 10px">${contenu}</div>`;
     const etapes = [
       { titre: `Salut, moi c’est ${c.nom} !`, txt: 'Je porte un capteur, comme toi. Ensemble, on va apprendre à comprendre ton corps.',
-        haut: `<img src="assets/compagnon/${c.id}.svg" alt="" style="width:250px;margin:0 auto">`, image: true },
+        haut: `<img class="vivant" src="assets/compagnon/${c.id}.svg" alt="" style="width:250px;margin:0 auto">`, image: true },
       { titre: 'Elle montre où va ton sucre', txt: 'Vers le haut, tout droit ou vers le bas. Touche ton chiffre sous ma bulle pour voir ta journée !',
         haut: `<h2 class="h2">Voici ma flèche</h2><div style="display:flex;justify-content:space-around;margin:20px 0 14px">${[['haut-droite', 'Ça monte'], ['droite', 'Stable'], ['bas-droite', 'Ça descend']].map(([d, l]) => `<div>${rond('#25728C', fleche(d))}<b style="font-size:14px;font-weight:500">${l}</b></div>`).join('')}</div><p class="petit">Plus la flèche penche, plus ça bouge vite.</p>` },
       { titre: 'Ce que je ressens, ton corps le ressent', txt: 'Quand j’ai faim ou soif, c’est ton corps qui te parle.',
@@ -273,7 +304,7 @@
       <div style="position:relative;width:200px;height:200px;margin:16px auto 0;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 0 0 8px rgba(255,255,255,.25)">
         <div class="centre"><b style="font-size:52px;color:#8E1B1B;line-height:1">2,9</b><div class="petit">mmol/L</div><div style="margin:6px auto 0;width:44px;height:44px;border-radius:50%;background:#8E1B1B;display:grid;place-items:center">${fleche('bas')}</div></div>
       </div>
-      <img src="assets/pose/${poseDe('foxy-dodo')}.svg" alt="" style="width:150px;margin:20px auto 0">
+      <img class="dort" src="assets/pose/${poseDe('foxy-dodo')}.svg" alt="" style="width:150px;margin:20px auto 0">
       <h1 id="t-urg" class="centre" style="font-size:22px;margin:16px 24px 0;font-weight:600">Je n’ai plus d’énergie.</h1>
       <p id="d-urg" class="centre txt" style="margin:4px 24px 0">Va voir un adulte tout de suite.</p>
       <div class="actions-bas" style="bottom:30px">
@@ -361,7 +392,7 @@
       <div style="position:relative;text-align:center;padding:28px 24px 0">
         <h1 id="t-bv" class="h1" style="font-size:40px;font-weight:700">Bien joué !</h1>
         <p style="font-size:18px;margin:6px 20px 0">${d.note}</p>
-        <img src="assets/compagnon/${S.compagnon}.svg" alt="" style="width:222px;margin:14px auto 0">
+        <img class="saute-entree" src="assets/compagnon/${S.compagnon}.svg" alt="" style="width:222px;margin:14px auto 0">
         <span class="pill-orange" style="margin-top:14px">${etoile}+${d.recompense} étoile${d.recompense > 1 ? 's' : ''}</span>
         <div class="carte" style="text-align:left;margin-top:20px;border-radius:20px"><h2 class="h3">${d.id === 'bolus' ? `Série : ${fait} jours sur ${d.total}` : `Progrès : ${fait} sur ${d.total}`}</h2><div class="barre" style="margin-top:12px" role="progressbar" aria-valuemin="0" aria-valuemax="${d.total}" aria-valuenow="${fait}" aria-label="Progrès"><span style="width:${fait / d.total * 100}%"></span></div></div>
         <div class="info centre" style="margin-top:14px">Maman a reçu un petit message.</div>
@@ -371,7 +402,7 @@
       <div style="position:relative;text-align:center;padding:16px 24px">
         <h1 id="t-bv" class="h1" style="font-size:38px">Bravo ${P()} !</h1>
         <p class="txt" style="margin-top:6px">Défi réussi en entier !</p>
-        <div style="width:190px;margin:48px auto 8px">${compagnonHTML({ neutre: true })}</div>
+        <div class="saute-entree" style="width:190px;margin:48px auto 8px">${compagnonHTML({ neutre: true })}</div>
         <span class="pastille" style="background:#FE9732;color:#fff;font-size:17px;font-weight:600">+${d.recompense} étoiles</span>
         ${d.badge ? `<div class="carte" style="margin-top:16px;display:flex;gap:14px;align-items:center;text-align:left"><img src="assets/badge/${d.badge}.svg" alt="" width="60"><div><div class="petit" style="color:#A34E16;font-weight:600">BADGE DÉBLOQUÉ</div><b>Série de 3</b></div></div>` : ''}
       </div>
@@ -528,7 +559,7 @@
         <p class="etiquette">Mon capteur</p>
         <div class="carte"><button class="ligne" style="width:100%;text-align:left" data-go="capteur"><div class="grow"><div class="txt">Mon capteur</div><div class="petit">${esc(S.profil.capteur)} · encore 1 jour</div></div><span class="chevron">›</span></button></div>
         <p class="etiquette">Sons et affichage</p>
-        <div class="carte">${bascule('sons', 'Voix et sons de ' + comp().nom)}${bascule('vibrations', 'Vibrations')}${bascule('cielAuto', 'Ciel selon l’heure', 'Jour, soir, nuit')}${bascule('grandTexte', 'Texte plus grand')}</div>
+        <div class="carte">${bascule('sons', 'Voix et sons de ' + comp().nom)}${bascule('vibrations', 'Vibrations')}${bascule('cielAuto', 'Ciel selon l’heure', 'Jour, soir, nuit')}${bascule('grandTexte', 'Texte plus grand')}${bascule('moinsAnim', 'Réduire les animations', 'Compagnon immobile, pas d’effets de mouvement')}</div>
         <p class="etiquette">Démo · simuler la glycémie</p>
         <div class="carte"><p class="petit" style="margin-bottom:10px">Pour présenter le projet : choisis un état et retourne à l’accueil.</p>
           <div style="display:flex;flex-wrap:wrap;gap:8px">${etats.map(([id, l]) => `<button class="chip ${S.etat === id ? 'actif' : ''}" style="border:2px solid #CDEAF4" data-act="etat" data-arg="${id}" aria-pressed="${S.etat === id}">${l}</button>`).join('')}</div>
@@ -811,7 +842,7 @@
         <h1 id="t-rvl" class="h2">Ton capteur se réveille</h1>
         <div style="position:relative;width:200px;height:200px;margin:16px auto 0"><svg viewBox="0 0 200 200" width="200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="#fff"/><circle cx="100" cy="100" r="80" fill="none" stroke="#CDEBF5" stroke-width="10"/><circle id="arcR" cx="100" cy="100" r="80" fill="none" stroke="#32A3C9" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 503" transform="rotate(-90 100 100)"/></svg>
           <div style="position:absolute;inset:0;display:grid;place-content:center"><b id="minR" style="font-size:24px;font-weight:600;color:#25728C">${ui.min} min</b><span class="petit">environ</span></div></div>
-        <div style="position:relative;width:160px;margin:18px auto 0"><img src="assets/${dodo ? 'pose/' + poseDe('foxy-dodo') : 'compagnon/' + S.compagnon}.svg" alt="" style="width:160px"><span style="position:absolute;right:-90px;top:10px;font-size:24px;font-weight:600;color:#25728C">Z z z</span></div>
+        <div style="position:relative;width:160px;margin:18px auto 0"><img class="dort" src="assets/${dodo ? 'pose/' + poseDe('foxy-dodo') : 'compagnon/' + S.compagnon}.svg" alt="" style="width:160px"><span class="zzz" aria-hidden="true" style="position:absolute;right:-90px;top:10px;font-size:24px;font-weight:600;color:#25728C"><i>Z</i> <i>z</i> <i>z</i></span></div>
         <div class="carte" style="border-radius:20px;margin-top:20px"><p class="txt">« Je fais une petite sieste. Je te réveille quand c’est prêt ! »</p></div>
       </div>
       <div class="actions-bas" style="bottom:70px"><button class="btn secondaire" data-tab="perso">Décorer ma chambre en attendant</button></div></section>`;
@@ -821,7 +852,7 @@
   E.pret = () => `<section class="screen ciel" aria-labelledby="t-pt"><img class="decor" src="${decorSrc('prairie')}" alt="">${statut()}
       <div style="position:relative;padding:20px 24px 0;text-align:center">
         <h1 id="t-pt" class="h1">Mon capteur est prêt !</h1>
-        <div style="width:229px;margin:44px auto 0">${compagnonHTML({ neutre: true })}</div>
+        <div class="saute-entree" style="width:229px;margin:44px auto 0">${compagnonHTML({ neutre: true })}</div>
         <div class="carte" style="display:flex;gap:22px;align-items:center;text-align:left;border-radius:24px;margin-top:20px"><img src="assets/badge/courage.svg" alt="" width="69"><div><div style="font-size:14px;font-weight:500;color:#C9561C">BADGE DÉBLOQUÉ</div><b class="h3" style="display:block">Courage</b><p class="petit">Tu as changé ton capteur avec ${esc(comp().nom)}.</p></div></div>
         <span class="pill-orange" style="margin-top:22px">${I.etoile.replace('fill="#FE9732"', 'fill="#fff"')}+3 étoiles</span>
       </div>
@@ -969,7 +1000,9 @@
   }
   function rendre() {
     document.body.classList.toggle('grand-texte', !!S.grandTexte);
+    document.body.classList.toggle('moins-anim', !!S.moinsAnim);
     app.innerHTML = (E[route.name] || E.accueil)();
+    animerParties();
     const h = app.querySelector('h1'); if (h && route.name !== 'accueil') { h.setAttribute('tabindex', '-1'); }
   }
   function retour() { const p = pile.pop(); if (p) { if (route.name === 'camera') arreterCamera(); route = p; rendre(); } else aller('accueil', null, true); }
@@ -999,7 +1032,8 @@
     autoriserCam: async () => { try { const f = await navigator.mediaDevices.getUserMedia({ video: true }); f.getTracks().forEach(t => t.stop()); } catch (e) { /* refusé : on continue */ } actions.finOnboard(); },
     finOnboard: () => { S.onboard = true; save(); pile.length = 0; aller('accueil', null, true); },
     retourner: () => { bulleRetournee = !bulleRetournee; const b = app.querySelector('.bulle-etat'); if (b) b.classList.toggle('retournee', bulleRetournee); },
-    toucherCompagnon: () => { if (S.etat === 'bas') aller('jus'); else if (S.etat === 'haut' || S.etat === 'tresHaut') { S.etat = 'zone'; save(); rendre(); toast('Ahhh, de l’eau fraîche ! Merci.'); } else toast(`${comp().nom} est content de te voir !`); },
+    toucherCompagnon: () => { sauter(app.querySelector('.compagnon > div'));
+      if (S.etat === 'bas') aller('jus'); else if (S.etat === 'haut' || S.etat === 'tresHaut') { S.etat = 'zone'; save(); rendre(); toast('Ahhh, de l’eau fraîche ! Merci.'); } else toast(`${comp().nom} est content de te voir !`); },
     appelerMaman: (nom) => {
       nom = typeof nom === 'string' && nom ? nom : 'maman';
       const v = document.createElement('div'); v.className = 'voile'; v.style.background = 'rgba(20,35,43,.55)';

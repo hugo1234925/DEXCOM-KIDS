@@ -266,3 +266,23 @@ input[type=range].seuil { width: 100%; accent-color: var(--c, #D12F2F); height: 
 .acc.glissable-acc:focus-visible { outline: 3px solid #FE9732; outline-offset: 3px; border-radius: 6px; }
 .acc.glissable-acc.tenu { cursor: grabbing; filter: drop-shadow(0 8px 10px rgba(20, 35, 43, .35)); }
 .glissable[data-choisi="true"] { filter: drop-shadow(0 0 5px rgba(255, 255, 255, .95)) drop-shadow(0 0 2px #25728C); }
+
+/* ---------- Compagnons animés ---------- */
+.vivant { animation: respire 3.4s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes respire { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.028); } }
+.inquiet { animation: balance 2.8s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes balance { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-2deg); } 75% { transform: rotate(2deg); } }
+.dort { animation: flotte 4.2s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes flotte { 0%, 100% { transform: translateY(0) scale(1, 1); } 50% { transform: translateY(-5px) scale(1.01, 1.03); } }
+.saute { animation: saute .65s cubic-bezier(.3, .7, .4, 1) !important; transform-origin: 50% 100%; }
+.saute-entree { animation: saute .7s .25s cubic-bezier(.3, .7, .4, 1) both; transform-origin: 50% 100%; }
+@keyframes saute { 0% { transform: translateY(0); } 30% { transform: translateY(-30px) scale(1.03, .97); } 55% { transform: translateY(0) scale(1.05, .93); } 75% { transform: translateY(-8px) scale(1, 1); } 100% { transform: translateY(0); } }
+.corps-svg { display: block; width: 100%; }
+.corps-svg .oeil { transform-box: fill-box; transform-origin: center; animation: cligne 5.5s infinite; }
+@keyframes cligne { 0%, 93%, 100% { transform: scaleY(1); } 95.5% { transform: scaleY(.08); } }
+.corps-svg .queue { transform-box: view-box; animation: remue 2.6s ease-in-out infinite; }
+@keyframes remue { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-6deg); } }
+.zzz i { display: inline-block; font-style: normal; animation: zzz 2.4s ease-in-out infinite; }
+.zzz i:nth-child(2) { animation-delay: .4s; } .zzz i:nth-child(3) { animation-delay: .8s; }
+@keyframes zzz { 0%, 100% { opacity: .3; transform: translateY(4px); } 50% { opacity: 1; transform: translateY(-6px); } }
+body.moins-anim *, body.moins-anim *::before, body.moins-anim *::after { animation: none !important; transition: none !important; }

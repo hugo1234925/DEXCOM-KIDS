@@ -132,6 +132,19 @@
 
   /* Écran d’accueil en miniature : décor, objets déplaçables, compagnon */
   const objW = (id) => Math.round(74 * ((S.tailles || {})[id] || 1));
+  /* Barre « – / + » de l’éditeur agrandi (mise à jour sans redessiner l’écran) */
+  function panneauTaille(type) {
+    const item = type === 'acc' ? D.accessoires.find(a => a.id === ui.accSel && S.porte.includes(a.id)) : D.objets.find(x => x.id === ui.objSel && S.objetsPlaces.includes(x.id));
+    const act = type === 'acc' ? 'accTaille' : 'objTaille';
+    return item
+      ? `<div class="carte" style="display:flex;align-items:center;gap:10px;padding:10px 14px"><img src="assets/objet/${item.id}.svg" alt="" width="36"><b style="flex:1;font-weight:600">${item.nom}</b><button class="btn-moins" style="width:48px;height:48px;font-size:26px" data-act="${act}" data-arg="-1" aria-label="Plus petit">–</button><button class="btn-moins" style="width:48px;height:48px;font-size:26px" data-act="${act}" data-arg="1" aria-label="Plus grand">+</button></div>`
+      : `<p class="pastille" style="justify-self:center;font-size:13px">Touche ${type === 'acc' ? 'un accessoire' : 'un objet'} pour changer sa taille</p>`;
+  }
+  function choisirDansEditeur(type, id) {
+    if (type === 'acc') { ui.accSel = id; app.querySelectorAll('[data-acc]').forEach(el => el.classList.toggle('choisi', el.dataset.acc === id)); }
+    else { ui.objSel = id; app.querySelectorAll('[data-obj]').forEach(el => el.dataset.choisi = String(el.dataset.obj === id)); }
+    const z = app.querySelector('.editeur .taille-zone'); if (z) z.innerHTML = panneauTaille(type);
+  }
   function sceneHTML() {
     const objs = S.objetsPlaces.map(id => D.objets.find(o => o.id === id)).filter(Boolean).map(o => {
       const q = S.positions[o.id] || o.place;
@@ -531,14 +544,12 @@
         <p class="pastille editeur-aide">Glisse les accessoires sur ${esc(comp().nom)} !</p>
         <div style="position:absolute;left:50%;top:150px;width:330px;transform:translateX(-50%)">${compagnonHTML({ neutre: true, edit: true })}</div>
         <div class="actions-bas" style="bottom:36px">
-          ${sel ? `<div class="carte" style="display:flex;align-items:center;gap:10px;padding:10px 14px"><img src="assets/objet/${sel.id}.svg" alt="" width="36"><b style="flex:1;font-weight:600">${sel.nom}</b><button class="btn-moins" style="width:48px;height:48px;font-size:26px" data-act="accTaille" data-arg="-1" aria-label="Plus petit">–</button><button class="btn-moins" style="width:48px;height:48px;font-size:26px" data-act="accTaille" data-arg="1" aria-label="Plus grand">+</button></div>` : '<p class="pastille" style="justify-self:center;font-size:13px">Touche un accessoire pour changer sa taille</p>'}
+          <div class="taille-zone" style="display:grid">${panneauTaille('acc')}</div>
           <button class="btn principal" data-act="fermerGrandAcc">Terminé</button></div></div>`; })() : ''}
       ${vue === 'decor' && ui.grand ? `<div class="editeur" role="dialog" aria-label="Placer mes objets">
         <div class="scene" style="transform:translateX(-50%) scale(${Math.min(1, (stage.offsetHeight || 926) / 926)})">${sceneHTML()}</div>
         <p class="pastille editeur-aide">Glisse les objets où tu veux !</p>
-        <div class="actions-bas" style="bottom:36px">${(() => { const o = D.objets.find(x => x.id === ui.objSel && S.objetsPlaces.includes(x.id)); return o
-          ? `<div class="carte" style="display:flex;align-items:center;gap:10px;padding:10px 14px"><img src="assets/objet/${o.id}.svg" alt="" width="36"><b style="flex:1;font-weight:600">${o.nom}</b><button class="btn-moins" style="width:48px;height:48px;font-size:26px" data-act="objTaille" data-arg="-1" aria-label="Plus petit">–</button><button class="btn-moins" style="width:48px;height:48px;font-size:26px" data-act="objTaille" data-arg="1" aria-label="Plus grand">+</button></div>`
-          : '<p class="pastille" style="justify-self:center;font-size:13px">Touche un objet pour changer sa taille</p>'; })()}
+        <div class="actions-bas" style="bottom:36px"><div class="taille-zone" style="display:grid">${panneauTaille('obj')}</div>
           <button class="btn principal" data-act="fermerGrand">Terminé</button></div></div>` : ''}</section>`;
   };
 
@@ -1128,8 +1139,8 @@
     agrandirAcc: () => { ui.grandAcc = true; rendre(); },
     fermerGrandAcc: () => { ui.grandAcc = false; ui.accSel = null; rendre(); toast(`${comp().nom} est prêt !`); },
     replacerAcc: () => { S.porte.forEach(id => { delete S.accPos[S.compagnon + ':' + id]; }); save(); rendre(); },
-    accTaille: (d) => { const a = D.accessoires.find(x => x.id === ui.accSel); if (!a) return; const q = accPos(a); const k = S.compagnon + ':' + a.id; S.accPos[k] = { x: q.x, y: q.y, w: Math.round(Math.max(12, Math.min(110, q.w * (d > 0 ? 1.12 : 1 / 1.12)))) }; save(); rendre(); },
-    objTaille: (d) => { const id = ui.objSel; if (!id) return; S.tailles[id] = Math.round(Math.max(0.5, Math.min(2.5, ((S.tailles || {})[id] || 1) * (d > 0 ? 1.15 : 1 / 1.15))) * 100) / 100; save(); rendre(); },
+    accTaille: (d) => { const a = D.accessoires.find(x => x.id === ui.accSel); if (!a) return; const q = accPos(a); const n = { x: q.x, y: q.y, w: Math.round(Math.max(12, Math.min(110, q.w * (d > 0 ? 1.12 : 1 / 1.12)))) }; S.accPos[S.compagnon + ':' + a.id] = n; save(); placerAcc(a.id, n); },
+    objTaille: (d) => { const id = ui.objSel; if (!id) return; S.tailles[id] = Math.round(Math.max(0.5, Math.min(2.5, ((S.tailles || {})[id] || 1) * (d > 0 ? 1.15 : 1 / 1.15))) * 100) / 100; save(); const w = objW(id); app.querySelectorAll(`[data-obj="${id}"]`).forEach(el => { el.style.width = w + 'px'; }); },
     agrandir: () => { ui.grand = true; rendre(); },
     fermerGrand: () => { ui.grand = false; ui.objSel = null; rendre(); toast('Ton décor est enregistré !'); },
     replacer: () => { S.positions = {}; S.tailles = {}; save(); rendre(); },
@@ -1163,7 +1174,7 @@
   const lacherAcc = () => {
     if (!glisseAcc) return; const g = glisseAcc; glisseAcc = null; g.o.classList.remove('tenu');
     if (g.n) { S.accPos[S.compagnon + ':' + g.a.id] = g.n; save(); }
-    if (app.querySelector('.editeur') && ui.accSel !== g.a.id) { ui.accSel = g.a.id; rendre(); }
+    if (app.querySelector('.editeur') && ui.accSel !== g.a.id) choisirDansEditeur('acc', g.a.id);
   };
   app.addEventListener('pointerup', lacherAcc); app.addEventListener('pointercancel', lacherAcc);
   app.addEventListener('keydown', (e) => {
@@ -1191,7 +1202,7 @@
   const lacher = () => {
     if (!glisse) return; const g = glisse; glisse = null; g.o.classList.remove('tenu');
     if (g.nx != null) { S.positions[g.id] = { x: g.nx, y: g.ny }; save(); app.querySelectorAll(`[data-obj="${g.id}"]`).forEach(el => { el.style.left = g.nx + 'px'; el.style.top = g.ny + 'px'; }); }
-    if (app.querySelector('.editeur') && ui.objSel !== g.id) { ui.objSel = g.id; rendre(); }
+    if (app.querySelector('.editeur') && ui.objSel !== g.id) choisirDansEditeur('obj', g.id);
   };
   app.addEventListener('pointerup', lacher); app.addEventListener('pointercancel', lacher);
   app.addEventListener('keydown', (e) => {

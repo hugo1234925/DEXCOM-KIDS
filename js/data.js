@@ -47,6 +47,7 @@ window.DK = {
     { id: 'ballons', nom: 'Ballons', prix: 0, defi: 'Défi Collation', place: { x: 336, y: 440 } },
     { id: 'arc-en-ciel', nom: 'Arc-en-ciel', prix: 20, place: { x: 300, y: 520 } },
     { id: 'cactus', nom: 'Cactus', prix: 15, lieu: 'Désert', place: { x: 330, y: 650 } },
+    { id: 'sapin', nom: 'Sapin', prix: 15, lieu: 'Neige', place: { x: 30, y: 560 } },
     { id: 'bonhomme-de-neige', nom: 'Bonhomme', prix: 25, lieu: 'Neige', place: { x: 330, y: 650 } },
     { id: 'fusee', nom: 'Fusée', prix: 40, lieu: 'Espace', place: { x: 336, y: 460 } }
   ],

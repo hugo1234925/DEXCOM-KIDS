@@ -230,7 +230,7 @@
     const nuit = S.cielAuto && moment() === 'nuit';
     const coll = route.arg === 'collation';
     if (coll) setTimeout(() => { if (route.name === 'accueil' && route.arg === 'collation') { route.arg = null; rendre(); } }, 4500);
-    const bulle = coll ? bulleSpeciale('#447C08', IC.cocheB) : etat.special === 'pompe' ? bulleSpeciale('#5E6A72', IC.lien) : etat.special === 'aide' ? bulleSpeciale('#D12F2F', IC.telB) : etat.bulle
+    const bulle = coll ? bulleSpeciale('#447C08', IC.cocheB) : etat.special === 'pompe' ? bulleSpeciale('#5E6A72', IC.lien) + bulleSpeciale('#25728C', IC.telB, 'chiffre') : etat.special === 'aide' ? bulleSpeciale('#D12F2F', IC.telB) : etat.bulle
       ? `<div class="face icone"><img src="assets/bulle/${etat.bulle}.svg" alt=""></div>
          <div class="face chiffre" style="--c:${etat.couleur}"><svg viewBox="0 0 240 243" style="position:absolute;inset:0" aria-hidden="true"><circle cx="58" cy="214" r="18" fill="#fff"/><circle cx="34" cy="232" r="11" fill="#fff"/><circle cx="58" cy="214" r="13" fill="${etat.couleur}"/><circle cx="34" cy="232" r="7" fill="${etat.couleur}"/></svg>
            <div class="chiffre-rond"><span class="val">${etat.val}</span><span class="unite">mmol/L</span><span class="fleche">${fleche(etat.fleche, S.etat === 'haut' || S.etat === 'tresHaut' ? '#14232B' : '#fff')}</span></div></div>`
@@ -247,7 +247,7 @@
       </div>
       <button class="bulle-etat ${bulleRetournee ? 'retournee' : ''}" data-act="retourner"
         aria-label="${coll ? 'Collation ajoutée' : etat.special ? esc(etat.message) : etat.bulle ? `Glycémie ${etat.val} millimoles par litre, ${etat.tendance}. Touche pour ${bulleRetournee ? 'revoir Foxy' : 'voir le chiffre'}.` : 'Capteur en préparation'}">${bulle}</button>
-      ${coll ? `<span class="pastille-etat">Collation ajoutée !</span><span class="pill-orange" style="position:absolute;top:416px;right:24px;padding:8px 18px;font-size:14px;z-index:3">+1 ★</span>` : etat.special === 'pompe' ? `<span class="pastille-etat">Pompe déconnectée</span>` : etat.special === 'aide' ? `<button class="appel-btn" data-act="appelerMaman">Appeler maman</button>` : etat.bulle ? `<button class="btn-journee" data-go="journee" aria-label="Voir ma journée. ${etat.val} millimoles par litre, ${etat.tendance}">${I.graph}<span>${etat.val} · ${etat.tendance}</span>${I.chevron}</button>` : `<span class="btn-journee" style="border:0">Capteur · 18 min</span>`}
+      ${coll ? `<span class="pastille-etat">Collation ajoutée !</span><span class="pill-orange" style="position:absolute;top:416px;right:24px;padding:8px 18px;font-size:14px;z-index:3">+1 ★</span>` : etat.special === 'pompe' ? `<span class="pastille-etat" id="pastillePompe">${bulleRetournee ? 'Appeler maman' : 'Pompe déconnectée'}</span>` : etat.special === 'aide' ? `<button class="appel-btn" data-act="appelerMaman">Appeler maman</button>` : etat.bulle ? `<button class="btn-journee" data-go="journee" aria-label="Voir ma journée. ${etat.val} millimoles par litre, ${etat.tendance}">${I.graph}<span>${etat.val} · ${etat.tendance}</span>${I.chevron}</button>` : `<span class="btn-journee" style="border:0">Capteur · 18 min</span>`}
       <p class="dialogue" style="${etat.bulle || etat.special || coll ? '' : 'top:300px'}">${esc(coll ? 'Miam, merci ! Mon énergie remonte.' : S.etat === 'zone' && !S.vuJournee ? 'Psst ! Touche ton chiffre pour voir ta journée.' : etat.message)}</p>
       <button class="compagnon" data-act="toucherCompagnon" aria-label="${esc(comp().nom)}${S.etat === 'bas' ? ' : donner un jus' : ''}" style="${etat.pose && S.compagnon === 'renard' ? 'width:230px;top:478px' : ''}">${compagnonHTML()}</button>
       ${nav('accueil')}
@@ -609,7 +609,7 @@
     raccrocher: '<svg viewBox="0 0 40 20" width="40" height="20"><path d="M2 12c10-10 26-10 36 0l-4 6-7-3v-5c-4-2-10-2-14 0v5l-7 3z" fill="#fff"/></svg>'
   };
   const applicateur = (w = 78) => `<svg viewBox="0 0 78 106" width="${w}" aria-hidden="true"><rect x="8" y="22" width="62" height="80" rx="18" fill="#fff" stroke="#25728C" stroke-width="3"/><rect x="24" y="4" width="30" height="24" rx="8" fill="#FE9732" stroke="#25728C" stroke-width="3"/><path d="M20 70h38M20 82h38" stroke="#CDEBF5" stroke-width="3" stroke-linecap="round"/></svg>`;
-  const bulleSpeciale = (couleur, contenu) => `<div class="face icone"><svg viewBox="0 0 240 243" aria-hidden="true"><circle cx="120" cy="112" r="89" fill="#fff"/><circle cx="58" cy="214" r="18" fill="#fff"/><circle cx="34" cy="232" r="11" fill="#fff"/><circle cx="120" cy="112" r="82" fill="${couleur}"/><circle cx="120" cy="112" r="74" fill="none" stroke="#fff" stroke-width="2"/><circle cx="58" cy="214" r="13" fill="${couleur}"/><circle cx="34" cy="232" r="7" fill="${couleur}"/><g transform="translate(-2,-4)">${contenu}</g></svg></div>`;
+  const bulleSpeciale = (couleur, contenu, face = 'icone') => `<div class="face ${face}"><svg viewBox="0 0 240 243" aria-hidden="true"><circle cx="120" cy="112" r="89" fill="#fff"/><circle cx="58" cy="214" r="18" fill="#fff"/><circle cx="34" cy="232" r="11" fill="#fff"/><circle cx="120" cy="112" r="82" fill="${couleur}"/><circle cx="120" cy="112" r="74" fill="none" stroke="#fff" stroke-width="2"/><circle cx="58" cy="214" r="13" fill="${couleur}"/><circle cx="34" cy="232" r="7" fill="${couleur}"/><g transform="translate(-2,-4)">${contenu}</g></svg></div>`;
 
   /* 1.2 Connexion */
   E.connexion = () => `<section class="screen ciel" aria-labelledby="t-cx">${statut()}
@@ -1031,7 +1031,13 @@
     finTuto: () => { ui = {}; aller('permission', null, true); },
     autoriserCam: async () => { try { const f = await navigator.mediaDevices.getUserMedia({ video: true }); f.getTracks().forEach(t => t.stop()); } catch (e) { /* refusé : on continue */ } actions.finOnboard(); },
     finOnboard: () => { S.onboard = true; save(); pile.length = 0; aller('accueil', null, true); },
-    retourner: () => { const e = D.etats[S.etat]; if (!e.bulle || route.arg === 'collation') { if (e.special === 'pompe') toast('Demande à un adulte de reconnecter ta pompe.'); else if (!e.bulle && S.etat === 'attente') toast('Ton capteur se prépare. Ton chiffre revient bientôt !'); return; } bulleRetournee = !bulleRetournee; const b = app.querySelector('.bulle-etat'); if (b) b.classList.toggle('retournee', bulleRetournee); },
+    retourner: () => { const e = D.etats[S.etat];
+      if (e.special === 'pompe' && route.arg !== 'collation') {
+        if (bulleRetournee) { actions.appelerMaman(); }
+        bulleRetournee = !bulleRetournee; const bb = app.querySelector('.bulle-etat'); if (bb) { bb.classList.toggle('retournee', bulleRetournee); bb.setAttribute('aria-label', bulleRetournee ? 'Appeler maman pour reconnecter la pompe' : 'Pompe déconnectée. Touche pour appeler un adulte.'); }
+        const pp = document.getElementById('pastillePompe'); if (pp) pp.textContent = bulleRetournee ? 'Appeler maman' : 'Pompe déconnectée'; return;
+      }
+      if (!e.bulle || route.arg === 'collation') { if (!e.bulle && S.etat === 'attente') toast('Ton capteur se prépare. Ton chiffre revient bientôt !'); return; } bulleRetournee = !bulleRetournee; const b = app.querySelector('.bulle-etat'); if (b) b.classList.toggle('retournee', bulleRetournee); },
     toucherCompagnon: () => { sauter(app.querySelector('.compagnon > div'));
       if (S.etat === 'bas') aller('jus'); else if (S.etat === 'haut' || S.etat === 'tresHaut') { S.etat = 'zone'; save(); rendre(); toast('Ahhh, de l’eau fraîche ! Merci.'); } else toast(`${comp().nom} est content de te voir !`); },
     appelerMaman: (nom) => {
